@@ -49,6 +49,7 @@ canvas{width:100%;height:200px;display:block;border-radius:12px;background:radia
 .empty{padding:14px;border-radius:16px;border:1px dashed rgba(255,255,255,.14);background:rgba(10,10,18,.40);color:rgba(255,255,255,.75);font-size:13px;line-height:1.35}
 .progress{height:8px;background:#111;border-radius:999px;overflow:hidden}
 .progress>div{height:100%;background:var(--red)}
+hr.sep{border:none;border-top:1px solid rgba(255,255,255,.06);margin:12px 0}
 @media(min-width:720px){.kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr))}canvas{height:240px}.tab{font-size:13px;padding:12px 10px}header{padding:calc(16px + var(--safe-t)) 16px 16px}}
 </style>
 </head>
@@ -172,18 +173,80 @@ Remada 3x8-12"></textarea>
     </div>
   </section>
 
-  <!-- MAIS -->
-  <section id="screen-mais" class="screen" aria-label="Mais">
+  <!-- TDEE (substitui "Mais") -->
+  <section id="screen-tdee" class="screen" aria-label="TDEE">
     <div class="card">
-      <h2>Mais</h2>
-      <small>Backup JSON offline (exportar/importar) e limpar dados.</small>
+      <h2>TDEE (Mifflin-St Jeor)</h2>
+      <small>Calcula BMR/TDEE e gera metas (P/F por kg + carbo restante). Aplique nas metas da Dieta para a data selecionada.</small>
+
       <div class="row" style="margin-top:12px;">
-        <button class="btn btn-ghost" id="btnExportJSON" type="button">Exportar JSON</button>
-        <button class="btn btn-ghost" id="btnImportJSON" type="button">Importar JSON</button>
-        <button class="btn btn-ghost" id="btnClearData" type="button">Limpar dados</button>
+        <div style="flex:1;min-width:160px;">
+          <small>Sexo</small>
+          <select id="tdeeSex" class="field">
+            <option value="male">Masculino</option>
+            <option value="female">Feminino</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:160px;">
+          <small>Atividade</small>
+          <select id="tdeeActivity" class="field">
+            <option value="1.2">1.2 (Sedentário)</option>
+            <option value="1.375">1.375 (Leve)</option>
+            <option value="1.55">1.55 (Moderado)</option>
+            <option value="1.725">1.725 (Alto)</option>
+            <option value="1.9">1.9 (Muito alto)</option>
+          </select>
+        </div>
       </div>
-      <input id="importFile" type="file" accept="application/json" style="display:none">
-      <textarea id="rawState" class="field" rows="12" style="margin-top:12px;" placeholder="Estado JSON..."></textarea>
+
+      <div class="row" style="margin-top:12px;">
+        <div style="flex:1;min-width:160px;"><small>Idade</small><input id="tdeeAge" class="field" type="number" placeholder="anos"></div>
+        <div style="flex:1;min-width:160px;"><small>Altura</small><input id="tdeeHeight" class="field" type="number" placeholder="cm"></div>
+        <div style="flex:1;min-width:160px;"><small>Peso</small><input id="tdeeWeight" class="field" type="number" step="0.1" placeholder="kg"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-primary" id="btnCalcTdee" type="button">Calcular</button>
+        <button class="btn btn-ghost" id="btnUseDietDate" type="button">Usar data da Dieta</button>
+      </div>
+
+      <div id="tdeeResult" style="margin-top:12px;"></div>
+
+      <hr class="sep">
+
+      <h3>Metas (ajuste fino)</h3>
+
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:1;min-width:180px;">
+          <small>Modo</small>
+          <select id="tdeeMode" class="field">
+            <option value="maintain">Manutenção</option>
+            <option value="cut">Cut (−300)</option>
+            <option value="bulk">Bulk (+200)</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:180px;">
+          <small>Calorias alvo (editável)</small>
+          <input id="tdeeCalTarget" class="field" type="number" step="25" placeholder="kcal">
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <small>Proteína: <b id="pKgLabel" style="color:var(--red)">2.00</b> g/kg</small>
+        <input id="pKg" class="field" style="padding:0;height:42px" type="range" min="1.8" max="2.2" step="0.05" value="2.0">
+      </div>
+
+      <div style="margin-top:10px;">
+        <small>Gordura: <b id="fKgLabel" style="color:var(--red)">0.80</b> g/kg</small>
+        <input id="fKg" class="field" style="padding:0;height:42px" type="range" min="0.6" max="1.0" step="0.05" value="0.8">
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-primary" id="btnGenTargets" type="button">Gerar metas</button>
+        <button class="btn btn-primary" id="btnApplyToDiet" type="button">Aplicar na Dieta</button>
+      </div>
+
+      <div id="tdeeTargetsOut" style="margin-top:12px;"></div>
     </div>
   </section>
 </main>
@@ -194,7 +257,7 @@ Remada 3x8-12"></textarea>
     <button class="tab" id="tab-logbook" type="button" data-target="logbook">Logbook</button>
     <button class="tab" id="tab-rotina" type="button" data-target="rotina">Rotina</button>
     <button class="tab" id="tab-dieta" type="button" data-target="dieta">Dieta</button>
-    <button class="tab" id="tab-mais" type="button" data-target="mais">Mais</button>
+    <button class="tab" id="tab-tdee" type="button" data-target="tdee">TDEE</button>
   </div>
 </nav>
 
@@ -207,7 +270,7 @@ const WEEK_KEYS=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado
 const MEAL_KEYS=["cafe","almoco","lanche","jantar","ceia"];
 const MEAL_LABEL={cafe:"Café",almoco:"Almoço",lanche:"Lanche",jantar:"Jantar",ceia:"Ceia"};
 let toastTimer=null;
-let state={version:2,routineText:"",routineParsed:{},sessions:[],days:{},measures:[],photos:[],gems:[]};
+let state={version:2,routineText:"",routineParsed:{},sessions:[],days:{},tdee:{},measures:[],photos:[],gems:[]};
 
 const $=id=>document.getElementById(id);
 const qsa=(sel,root=document)=>Array.from(root.querySelectorAll(sel));
@@ -218,13 +281,14 @@ function showToast(msg){const el=$("toast");if(!el)return;el.textContent=msg;el.
 function deepClone(o){try{return JSON.parse(JSON.stringify(o))}catch{return {}}}
 
 function migrateState(old){
-const base=deepClone({version:2,routineText:"",routineParsed:{},sessions:[],days:{},measures:[],photos:[],gems:[]});
+const base=deepClone({version:2,routineText:"",routineParsed:{},sessions:[],days:{},tdee:{},measures:[],photos:[],gems:[]});
 if(!old||typeof old!=="object")return base;
 const m=deepClone(base);
 m.routineText=typeof old.routineText==="string"?old.routineText:typeof old.routine==="string"?old.routine:typeof old.routineRaw==="string"?old.routineRaw:m.routineText;
 m.routineParsed=(old.routineParsed&&typeof old.routineParsed==="object")?old.routineParsed:(old.routineJSON&&typeof old.routineJSON==="object")?old.routineJSON:m.routineParsed;
 m.sessions=Array.isArray(old.sessions)?old.sessions:Array.isArray(old.logbook)?old.logbook:m.sessions;
 m.days=(old.days&&typeof old.days==="object")?old.days:(old.dietDays&&typeof old.dietDays==="object")?old.dietDays:(old.nutritionDays&&typeof old.nutritionDays==="object")?old.nutritionDays:(old.dietTargets&&typeof old.dietTargets==="object")?old.dietTargets:m.days;
+m.tdee=(old.tdee&&typeof old.tdee==="object")?old.tdee:m.tdee;
 m.measures=Array.isArray(old.measures)?old.measures:m.measures;
 m.photos=Array.isArray(old.photos)?old.photos:m.photos;
 m.gems=Array.isArray(old.gems)?old.gems:m.gems;
@@ -232,6 +296,7 @@ if(typeof m.routineText!=="string")m.routineText="";
 if(!m.routineParsed||typeof m.routineParsed!=="object")m.routineParsed={};
 if(!Array.isArray(m.sessions))m.sessions=[];
 if(!m.days||typeof m.days!=="object")m.days={};
+if(!m.tdee||typeof m.tdee!=="object")m.tdee={};
 m.version=2;return m;
 }
 function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch{showToast("Erro ao salvar (storage cheio?)")}}
@@ -255,6 +320,8 @@ const wn=Math.ceil((((t-ys)/86400000)+1)/7);
 return `${t.getUTCFullYear()}-W${wn}`;
 }
 function unaccent(s){return (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+
+/* ROTINA PARSER */
 function parseRoutineV2(text){
 const lines=(text||"").split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
 const days=[
@@ -297,7 +364,7 @@ if(tid==="dashboard"){updateDashboard();drawChart(state.sessions)}
 else if(tid==="logbook"){renderLogbook()}
 else if(tid==="rotina"){renderRoutine()}
 else if(tid==="dieta"){renderDiet()}
-else if(tid==="mais"){renderMore()}
+else if(tid==="tdee"){renderTdee()}
 }
 
 /* DASHBOARD */
@@ -321,6 +388,7 @@ $("kpiWeekSessions").textContent=String(weekSessions);
 $("kpiWeekVolume").textContent=String(Math.round(weekVolume));
 $("kpiTotalSessionsSub").textContent=total?new Date(state.sessions[total-1].date).toLocaleDateString("pt-BR"):"—";
 $("kpiWeekSessionsSub").textContent=`Semana ${nowW}`;
+
 const today=isoDay(new Date());
 let adhText="—",adhSub="kcal / P";
 if(state.days&&state.days[today]){
@@ -361,7 +429,7 @@ ctx.fillText(String(v),x,cssH-10);
 });
 }
 
-/* LOGBOOK */
+/* LOGBOOK (Hevy-like: rotina -> sets -> kg/reps/RIR) */
 function buildSetRow(){
 const row=document.createElement("div");row.className="set-row";
 row.innerHTML=`<input class="field" type="number" step="0.5" placeholder="kg" style="margin:0">
@@ -374,7 +442,7 @@ return row;
 function buildExerciseCard(name,blocks){
 const wrap=document.createElement("div");wrap.className="card";wrap.dataset.exercise="1";
 wrap.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-<div><div class="ex-name" style="font-weight:950;letter-spacing:.2px;">${escapeHtml(name)}</div><small>Edite livremente.</small></div>
+<div><div class="ex-name" style="font-weight:950;letter-spacing:.2px;">${escapeHtml(name)}</div><small>Rotina define o nº de sets; você pode editar.</small></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;">
 <button class="btn btn-ghost" type="button" data-act="addset">+ Set</button>
 <button class="btn btn-ghost" type="button" data-act="rmex">Remover</button>
@@ -528,51 +596,120 @@ const idx=arr.findIndex(x=>x.id===id);
 if(idx>=0){arr.splice(idx,1);saveState();renderDiet();showToast("Removido.");}
 }
 
-/* MAIS (export/import) */
-function renderMore(){
-$("rawState").value=JSON.stringify(state,null,2);
+/* TDEE */
+function num(v){const n=parseFloat(v);return Number.isFinite(n)?n:0}
+function round1(x){return Math.round(x*10)/10}
+function calcBMR(sex,kg,cm,age){
+if(sex==="female")return 10*kg+6.25*cm-5*age-161;
+return 10*kg+6.25*cm-5*age+5;
 }
-function exportJSON(){
-const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="logbook_v2_backup.json";a.click();
-showToast("Exportado.");
+function renderTdee(){
+const t=state.tdee||{};
+if(t.sex) $("tdeeSex").value=t.sex;
+if(t.activity) $("tdeeActivity").value=String(t.activity);
+if(t.age) $("tdeeAge").value=t.age;
+if(t.height) $("tdeeHeight").value=t.height;
+if(t.weight) $("tdeeWeight").value=t.weight;
+if(t.mode) $("tdeeMode").value=t.mode;
+if(t.pKg) $("pKg").value=t.pKg;
+if(t.fKg) $("fKg").value=t.fKg;
+updateTdeeLabels();
+if(t.calTarget) $("tdeeCalTarget").value=t.calTarget;
+renderTdeeResult();
+renderTdeeTargetsBox();
 }
-function importJSON(file){
-const fr=new FileReader();
-fr.onload=()=>{try{state=migrateState(JSON.parse(fr.result));saveState();showToast("Importado ✅");renderAll()}catch{showToast("JSON inválido.")}};
-fr.readAsText(file);
+function updateTdeeLabels(){
+$("pKgLabel").textContent=(+$("pKg").value).toFixed(2);
+$("fKgLabel").textContent=(+$("fKg").value).toFixed(2);
 }
-function clearData(){
-localStorage.removeItem(STORAGE_KEY);
-state=migrateState(null);saveState();
-showToast("Dados limpos.");
-renderAll();nav("dashboard");
+function syncCalTargetFromMode(){
+const t=state.tdee||{};
+if(!(t.tdee>0))return;
+const mode=$("tdeeMode").value;
+let cal=t.tdee;
+if(mode==="cut")cal=t.tdee-300;
+if(mode==="bulk")cal=t.tdee+200;
+$("tdeeCalTarget").value=Math.round(cal);
 }
-
-/* INIT + BINDINGS */
-function renderAll(){
-updateDashboard();drawChart(state.sessions);
-renderRoutine();renderDiet();renderMore();
+function doCalcTdee(){
+const sex=$("tdeeSex").value;
+const activity=num($("tdeeActivity").value);
+const age=num($("tdeeAge").value);
+const height=num($("tdeeHeight").value);
+const weight=num($("tdeeWeight").value);
+if(!(age>0&&height>0&&weight>0)){showToast("Preencha idade, altura e peso.");return}
+const bmr=calcBMR(sex,weight,height,age);
+const tdee=bmr*activity;
+state.tdee=state.tdee||{};
+Object.assign(state.tdee,{sex,activity,age,height,weight,bmr:Math.round(bmr),tdee:Math.round(tdee)});
+saveState();
+renderTdeeResult();
+syncCalTargetFromMode();
+showToast("TDEE calculado.");
 }
-function bind(){
-qsa(".tab").forEach(btn=>btn.addEventListener("click",()=>nav(btn.getAttribute("data-target"))));
-$("btnSaveRoutine").addEventListener("click",saveRoutine);
-$("btnClearRoutine").addEventListener("click",()=>{state.routineText="";state.routineParsed={};saveState();renderRoutine();showToast("Rotina limpa.")});
-$("btnSaveSession").addEventListener("click",()=>{saveSession();updateDashboard();drawChart(state.sessions);nav("dashboard")});
-$("btnAddExercise").addEventListener("click",()=>{ // modal inline sem alert/prompt
-openInlinePrompt("Nome do exercício extra:").then(name=>{
-if(!name)return;
-const host=$("todayExercises");host.appendChild(buildExerciseCard(name,[{nSets:3,repMin:0,repMax:0}]));
-showToast("Exercício extra adicionado.");
-});
-});
-$("dietDate").addEventListener("change",renderDiet);
-$("btnSaveTargets").addEventListener("click",saveDietTargets);
-$("btnAddFood").addEventListener("click",addFoodManual);
-$("btnExportJSON").addEventListener("click",()=>{renderMore();exportJSON()});
-$("btnImportJSON").addEventListener("click",()=>$("importFile").click());
-$("importFile").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(f)importJSON(f);e.target.value=""});
-$("btnClearData").addEventListener("click",clearData);
+function renderTdeeResult(){
+const t=state.tdee||{};
+if(t.bmr&&t.tdee){
+$("tdeeResult").innerHTML=`<div class="card" style="margin:0;margin-top:12px;">
+<div style="display:flex;gap:12px;flex-wrap:wrap;">
+<div style="flex:1;min-width:160px;"><small>BMR</small><div style="font-weight:950;font-size:18px;">${t.bmr} kcal</div></div>
+<div style="flex:1;min-width:160px;"><small>TDEE</small><div style="font-weight:950;font-size:18px;">${t.tdee} kcal</div></div>
+</div></div>`;
+}else{
+$("tdeeResult").innerHTML=`<div class="empty" style="margin-top:12px;">Preencha os dados e clique <b>Calcular</b>.</div>`;
+}
+}
+function genTargets(){
+const t=state.tdee||{};
+const weight=num($("tdeeWeight").value)||t.weight||0;
+if(!(t.tdee>0)||!(weight>0)){showToast("Calcule o TDEE e informe o peso.");return}
+const mode=$("tdeeMode").value;
+let cal=num($("tdeeCalTarget").value);
+if(!(cal>0)){
+cal=t.tdee+(mode==="cut"?-300:mode==="bulk"?200:0);
+cal=Math.round(cal);
+$("tdeeCalTarget").value=cal;
+}
+const pKg=num($("pKg").value),fKg=num($("fKg").value);
+const p=Math.round(pKg*weight);
+const f=Math.round(fKg*weight);
+const kcalPF=p*4+f*9;
+const c=Math.max(0,Math.round((cal-kcalPF)/4));
+state.tdee=state.tdee||{};
+Object.assign(state.tdee,{mode,calTarget:cal,pKg,fKg,targets:{kcal:cal,p,c,f}});
+saveState();
+renderTdeeTargetsBox();
+showToast("Metas geradas.");
+}
+function renderTdeeTargetsBox(){
+const t=state.tdee||{};
+const g=t.targets;
+if(!g){$("tdeeTargetsOut").innerHTML=`<div class="empty">Clique <b>Gerar metas</b> para ver P/C/F.</div>`;return}
+$("tdeeTargetsOut").innerHTML=`<div class="card" style="margin:0;">
+<div style="display:flex;gap:12px;flex-wrap:wrap;">
+<div style="flex:1;min-width:140px;"><small>Calorias</small><div style="font-weight:950;font-size:18px;">${g.kcal}</div></div>
+<div style="flex:1;min-width:140px;"><small>Proteína (g)</small><div style="font-weight:950;font-size:18px;">${g.p}</div></div>
+<div style="flex:1;min-width:140px;"><small>Carbo (g)</small><div style="font-weight:950;font-size:18px;">${g.c}</div></div>
+<div style="flex:1;min-width:140px;"><small>Gordura (g)</small><div style="font-weight:950;font-size:18px;">${g.f}</div></div>
+</div></div>`;
+}
+function applyTargetsToDiet(){
+const t=state.tdee||{};
+if(!t.targets){showToast("Gere metas antes de aplicar.");return}
+const day=($("dietDate")&&$("dietDate").value)?$("dietDate").value:isoDay(new Date());
+const d=ensureDietDay(day);
+d.targets.kcal=t.targets.kcal;
+d.targets.p=t.targets.p;
+d.targets.c=t.targets.c;
+d.targets.f=t.targets.f;
+saveState();
+showToast(`Metas aplicadas em ${day}.`);
+renderDiet();
+updateDashboard();
+}
+function useDietDate(){
+const day=($("dietDate")&&$("dietDate").value)?$("dietDate").value:isoDay(new Date());
+showToast(`Data alvo: ${day}`);
 }
 
 /* Inline prompt (sem alert/prompt) */
@@ -606,13 +743,43 @@ overlay.addEventListener("click",e=>{if(e.target===overlay)cleanup("")});
 });
 }
 
+/* BIND */
+function bind(){
+qsa(".tab").forEach(btn=>btn.addEventListener("click",()=>nav(btn.getAttribute("data-target"))));
+$("btnSaveRoutine").addEventListener("click",saveRoutine);
+$("btnClearRoutine").addEventListener("click",()=>{state.routineText="";state.routineParsed={};saveState();renderRoutine();showToast("Rotina limpa.")});
+$("btnSaveSession").addEventListener("click",()=>{saveSession();updateDashboard();drawChart(state.sessions);nav("dashboard")});
+$("btnAddExercise").addEventListener("click",()=>openInlinePrompt("Nome do exercício extra:").then(name=>{
+if(!name)return;
+$("todayExercises").appendChild(buildExerciseCard(name,[{nSets:3,repMin:0,repMax:0}]));
+showToast("Exercício extra adicionado.");
+}));
+$("dietDate").addEventListener("change",renderDiet);
+$("btnSaveTargets").addEventListener("click",saveDietTargets);
+$("btnAddFood").addEventListener("click",addFoodManual);
+
+$("pKg").addEventListener("input",updateTdeeLabels);
+$("fKg").addEventListener("input",updateTdeeLabels);
+$("tdeeMode").addEventListener("change",()=>{state.tdee=state.tdee||{};state.tdee.mode=$("tdeeMode").value;saveState();syncCalTargetFromMode()});
+$("btnCalcTdee").addEventListener("click",doCalcTdee);
+$("btnUseDietDate").addEventListener("click",useDietDate);
+$("btnGenTargets").addEventListener("click",genTargets);
+$("btnApplyToDiet").addEventListener("click",applyTargetsToDiet);
+}
+
+/* INIT */
 window.addEventListener("DOMContentLoaded",()=>{
 loadState();
 $("dietDate").value=isoDay(new Date());
 bind();
-renderAll();
+renderRoutine();
+renderDiet();
+renderTdee();
+updateDashboard();
+drawChart(state.sessions);
 nav("dashboard");
 });
+
 })();</script>
 </body>
 </html>
