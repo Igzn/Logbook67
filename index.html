@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Logbook">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2338bdf8'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='%230f172a'%3E💪%3C/text%3E%3C/svg%3E">
+    <title>Logbook</title>
+    <style>
+        :root {
+    --color-bg: #050509;
+    --color-bg-secondary: #0d0d14;
+    --color-primary: #ff0000;
+    --color-primary-dark: #7a0000;
+    --color-accent: #ff2a2a;
+    --color-warning: #f59e0b;
+    --color-text: #f5f5f7;
+    --color-text-muted: #9aa0a6;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            padding-bottom: 80px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            background: var(--color-surface);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--color-bg);
+            position: sticky;
+            top: 73px;
+            z-index: 99;
+            overflow-x: auto;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: var(--color-surface);
+            border: none;
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: var(--color-primary);
+            color: var(--color-bg);
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 1rem;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card h3 {
+            color: var(--color-primary);
+            font-size: 1.125rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--color-bg);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            color: var(--color-text);
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--color-primary);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: var(--color-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .log-entry {
+            background: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .log-date {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .log-content {
+            font-size: 0.875rem;
+        }
+
+        .btn-delete {
+            background: var(--color-error);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .macro-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .macro-row:last-child {
+            border-bottom: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-text-muted);
+        }
+
+        .progress-bar {
+            background: var(--color-bg);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--color-primary);
+            transition: width 0.3s;
+        }
+
+        .workout-log {
+            background: var(--color-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+        }
+
+        .workout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .workout-name {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .workout-date {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .exercise-entry {
+            font-size: 0.875rem;
+            padding: 0.25rem 0;
+            color: var(--color-text);
+        }
+
+        .exercise-input {
+            background: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .exercise-input input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--color-text);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .set-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .set-inputs input {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--color-surface);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            color: var(--color-text);
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .btn-small {
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .comparison-card {
+            background: var(--color-bg);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .comparison-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .comparison-data {
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .pr-badge {
+            display: inline-block;
+            background: var(--color-success);
+            color: var(--color-bg);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .trend-up {
+            color: var(--color-success);
+        }
+
+        .trend-down {
+            color: var(--color-error);
+        }
+
+        .trend-stable {
+            color: var(--color-warning);
+        }
+
+        .volume-chart {
+            background: var(--color-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            height: 200px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .volume-bar {
+            flex: 1;
+            background: var(--color-primary);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 20px;
+            cursor: pointer;
+        }
+
+        .volume-bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            color: var(--color-text-muted);
+            white-space: nowrap;
+        }
+
+        .volume-bar-value {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            white-space: nowrap;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: var(--color-surface);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--color-text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--color-primary);
+            color: var(--color-bg);
+            border-color: var(--color-primary);
+        }
+
+        .notification-banner {
+            background: linear-gradient(135deg, var(--color-primary), #dc2626);
+            color: white;
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .notification-banner:active {
+            transform: scale(0.98);
+        }
+
+        .gems-message {
+            background: var(--color-surface);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .gems-message.user {
+            background: var(--color-bg);
+            border-left-color: var(--color-success);
+        }
+
+        .gems-message-label {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .gems-message-content {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .reminder-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--color-error);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .notification-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--color-success);
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    .photo-card{
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;
+    overflow:hidden;
+    background:var(--color-bg);
+}
+.photo-card img{width:100%;height:140px;object-fit:cover;display:block;}
+.photo-card .meta{padding:0.5rem;font-size:0.75rem;color:var(--color-text-muted);}
+.photo-card .actions{padding:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;}
+.mini-btn{
+    padding:0.45rem 0.6rem;
+    border-radius:6px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:transparent;
+    color:var(--color-text);
+    cursor:pointer;
+    font-size:0.75rem;
+}
+/* ===== Batman Beyond (clean) ===== */
+body{
+  background:
+    radial-gradient(900px 500px at 15% 0%, rgba(255,26,26,0.10), transparent 55%),
+    radial-gradient(700px 400px at 90% 10%, rgba(153,0,0,0.12), transparent 60%),
+    var(--color-bg);
+}
+.card{
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.65);
+}
+.btn:not(.btn-secondary){
+  background: linear-gradient(180deg, rgba(255,26,26,0.95), rgba(153,0,0,0.92));
+  border: 1px solid rgba(255,26,26,0.35);
+  box-shadow: 0 0 0 1px rgba(255,26,26,0.18), 0 0 22px rgba(255,26,26,0.20), 0 14px 28px rgba(0,0,0,0.55);
+}
+.btn:not(.btn-secondary):active{ transform: translateY(1px); }
+.tab.active{ box-shadow: 0 0 0 1px rgba(255,26,26,0.5), 0 0 18px rgba(255,26,26,0.12); }
+input, select, textarea{
+  background: rgba(9,9,15,0.95);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+input:focus, select:focus, textarea:focus{
+  border-color: rgba(255,26,26,0.55);
+  box-shadow: 0 0 0 3px rgba(255,26,26,0.12);
+  outline: none;
+}
+h3::after{
+  content:"";
+  display:block;
+  height:2px;
+  width:70px;
+  margin-top:10px;
+  background: linear-gradient(90deg, rgba(255,26,26,0.95), transparent);
+  border-radius:999px;
+}
+/* Ensure tabs always clickable (no overlays) */
+.app-container, .tabs, .tab { position: relative; z-index: 1; }
+/* =================================== */
+/* ===== BATMAN FUTURE THEME (SAFE) ===== */
+body{
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: radial-gradient(1200px 600px at 20% 0%, rgba(255,0,0,0.08), transparent 55%),
+                radial-gradient(900px 500px at 90% 10%, rgba(122,0,0,0.10), transparent 60%),
+                var(--color-bg);
+}
+.card{
+    border: 1px solid rgba(255,0,0,0.18);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+}
+.btn:not(.btn-secondary){
+    background: linear-gradient(180deg, #ff0000, #7a0000);
+    border: 1px solid rgba(255,0,0,0.40);
+    box-shadow: 0 0 8px rgba(255,0,0,0.6), 0 0 18px rgba(255,0,0,0.30), 0 14px 28px rgba(0,0,0,0.60);
+}
+.tab.active{
+    box-shadow: 0 0 6px rgba(255,0,0,0.75), 0 0 14px rgba(255,0,0,0.35);
+}
+input,select,textarea{
+    background:#0a0a12;
+    border:1px solid rgba(255,255,255,0.10);
+}
+input:focus,select:focus,textarea:focus{
+    border-color: rgba(255,0,0,0.65);
+    box-shadow: 0 0 0 2px rgba(255,0,0,0.15);
+}
+/* Scanlines (subtle) */
+.app-container::before{
+    content:"";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.02),
+        rgba(255,255,255,0.02) 1px,
+        transparent 1px,
+        transparent 4px
+    );
+    mix-blend-mode: overlay;
+    opacity: 0.22;
+}
+/* ===================================== */
+</style>
+</head>
+<body>
+    <div id="runtimeErrorBanner" style="display:none;position:sticky;top:0;z-index:9999;background:rgba(255,26,26,0.12);border-bottom:1px solid rgba(255,26,26,0.35);padding:10px 12px;color:var(--color-text);font-size:0.9rem;"></div>
+
+    <div class="header">
+        <h1>💪 Logbook</h1>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('dashboard', this)" type="button">Dashboard</button>
+        <button class="tab" onclick="showTab('macros', this)" type="button">Macros</button>
+        <button class="tab" onclick="showTab('diario', this)" type="button">Diário</button>
+        <button class="tab" onclick="showTab('medidas', this)" type="button">Medidas</button>
+        <button class="tab" onclick="showTab('rotina', this)" type="button">Rotina de Treino</button>
+        <button class="tab" onclick="showTab('dieta', this)" type="button">Dieta</button>
+        <button class="tab" onclick="showTab('logbook', this)" type="button">Log</button>
+        <button class="tab" onclick="showTab('analise', this)" type="button">Análise</button>
+        <button class="tab" onclick="showTab('fisico', this)" type="button">Físico</button>
+        <button class="tab" onclick="showTab('gems', this)" type="button">💎 GEMS</button>
+        <button class="tab" onclick="showTab('refeeds', this)" type="button">🔄 Refeeds</button>
+        <button class="tab" onclick="showTab('deload', this)" type="button">😴 Deload</button>
+    </div>
+
+    <div class="content">
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="section active">
+            <div class="card">
+                <h3>Seu Progresso</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Peso Atual</div>
+                        <div class="stat-value" id="currentWeight">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Cintura</div>
+                        <div class="stat-value" id="currentWaist">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Meta Semanal</div>
+                        <div class="stat-value">-0.43kg</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value" id="statusEmoji">🔥</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Macros Hoje</h3>
+                <div class="macro-row">
+                    <span>Proteína</span>
+                    <span id="proteinToday">0g / 160g</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="proteinBar" style="width: 0%"></div>
+                </div>
+                <div class="macro-row">
+                    <span>Carbo</span>
+                    <span id="carbToday">0g / 315g</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="carbBar" style="width: 0%"></div>
+                </div>
+                <div class="macro-row">
+                    <span>Gordura</span>
+                    <span id="fatToday">0g / 55g</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="fatBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MACROS -->
+        <div id="macros" class="section">
+            <div class="card">
+                <h3>Calculadora de Macros</h3>
+                <div class="form-group">
+                    <label>Peso (kg)</label>
+                    <input type="number" id="macroWeight" value="86" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Meta Calórica Diária</label>
+                    <input type="number" id="macroCalories" value="2700" step="50">
+                </div>
+                <div class="form-group">
+                    <label>Proteína (g/kg)</label>
+                    <input type="number" id="macroProteinRatio" value="1.9" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>% Gordura</label>
+                    <input type="number" id="macroFatPercent" value="18" step="1">
+                </div>
+                <button class="btn" onclick="calculateMacros()">Calcular Macros</button>
+            </div>
+
+            <div class="card" id="macroResults" style="display:none;">
+                <h3>Seus Macros</h3>
+                <div class="macro-row">
+                    <span>Proteína</span>
+                    <span id="resultProtein">--g</span>
+                </div>
+                <div class="macro-row">
+                    <span>Gordura</span>
+                    <span id="resultFat">--g</span>
+                </div>
+                <div class="macro-row">
+                    <span>Carboidrato</span>
+                    <span id="resultCarb">--g</span>
+                </div>
+                <button class="btn" onclick="saveMacros()">Salvar como Meta</button>
+            </div>
+        </div>
+
+        <!-- DIÁRIO -->
+        <div id="diario" class="section">
+            <div class="card" id="diaryReferences" style="margin-bottom:1rem;"></div>
+            <div class="card">
+                <h3>Registrar Refeição</h3>
+                <div class="form-group">
+                    <label>Refeição</label>
+                    <select id="mealType">
+                        <option>Café da manhã</option>
+                        <option>Almoço</option>
+                        <option>Lanche</option>
+                        <option>Janta</option>
+                        <option>Pós-treino</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Alimentos (um por linha)</label>
+                    <textarea id="mealFoods" placeholder="Ex:&#10;300g de arroz&#10;100g de feijão preto&#10;150g de bife de boi" style="min-height:120px;"></textarea>
+                </div>
+                <button class="btn" onclick="calculateAndAddMeal()">Calcular e Adicionar Refeição</button>
+                
+                <div id="mealCalculation" style="display:none;margin-top:1rem;padding:1rem;background:var(--color-bg);border-radius:6px;">
+                    <h4 style="color:var(--color-primary);font-size:1rem;margin-bottom:0.5rem;">Macros Calculados:</h4>
+                    <div style="font-size:0.875rem;">
+                        <strong>Proteína:</strong> <span id="calcProtein">0g</span><br>
+                        <strong>Carboidrato:</strong> <span id="calcCarb">0g</span><br>
+                        <strong>Gordura:</strong> <span id="calcFat">0g</span><br>
+                        <strong>Calorias:</strong> <span id="calcCalories">0 kcal</span>
+                    </div>
+                    <button class="btn" onclick="confirmMeal()" style="margin-top:1rem;">Confirmar e Salvar</button>
+                    <button class="btn btn-secondary" onclick="cancelMealCalculation()" style="margin-top:0.5rem;">Cancelar</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Refeições de Hoje</h3>
+                <div id="mealList"></div>
+                <button class="btn btn-secondary" onclick="clearTodayMeals()" style="margin-top:1rem;">Limpar Dia</button>
+            </div>
+        </div>
+
+        <!-- MEDIDAS -->
+        <div id="medidas" class="section">
+            <div class="card">
+                <h3>Registrar Medidas</h3>
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="date" id="measureDate">
+                </div>
+                <div class="form-group">
+                    <label>Peso (kg)</label>
+                    <input type="number" id="measureWeight" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Cintura (cm)</label>
+                    <input type="number" id="measureWaist" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Percepção no Treino</label>
+                    <select id="measurePerformance">
+                        <option value="forte">💪 Forte - Cargas subindo</option>
+                        <option value="mantendo">✅ Mantendo - Performance estável</option>
+                        <option value="fraco">⚠️ Fraco - Cargas caindo</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="addMeasurement()">Salvar Medida</button>
+            </div>
+
+            <div class="card">
+                <h3>Histórico de Medidas</h3>
+                <div id="measurementList"></div>
+            </div>
+        </div>
+
+        
+        <!-- ROTINA DE TREINO -->
+        <div id="rotina" class="section">
+            <div class="card">
+                <h3>📝 Rotina de Treino (Editável)</h3>
+                <p style="color:var(--color-text-muted);font-size:0.875rem;margin-bottom:1rem;">
+                    Cole ou escreva sua rotina do jeito que quiser. O Log (Logbook) vai se adaptar automaticamente aos dias e exercícios.
+                </p>
+
+                <div class="form-group">
+                    <label>Sua rotina</label>
+                    <textarea id="customRoutine" style="min-height:240px;"
+                        placeholder="Ex:
+Segunda - Torso
+1. Supino reto
+2. Remada curvada
+
+Terça - Pernas
+1. Agachamento
+2. Mesa flexora
+...
+"></textarea>
+                </div>
+
+                <button class="btn" onclick="saveCustomRoutine()">💾 Salvar Rotina</button>
+                <button class="btn btn-secondary" type="button" onclick="clearRoutine()" style="margin-left:0.5rem;">🗑 Limpar Rotina</button>
+                <div id="routineStatus" style="margin-top:1rem;color:var(--color-text-muted);font-size:0.85rem;"></div>
+                <div id="routinePreview" style="margin-top:1rem;"></div>
+            </div>
+        </div>
+
+
+        <div id="dieta" class="section">
+            <div class="card">
+                <h3>🥗 Dieta / Macros (Editável)</h3>
+                <p style="color:var(--color-text-muted);font-size:0.875rem;margin-bottom:1rem;">
+                    Escreva sua dieta (texto livre) e/ou ajuste suas metas de macros. O Diário usa isso como referência.
+                </p>
+
+                <div class="stats-grid" style="margin-bottom:1rem;">
+                    <div class="stat-card">
+                        <div class="stat-label">Calorias</div>
+                        <input type="number" id="dietCalories" placeholder="kcal" style="width:100%;margin-top:0.5rem;">
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Proteína</div>
+                        <input type="number" id="dietProtein" placeholder="g" style="width:100%;margin-top:0.5rem;">
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Carbo</div>
+                        <input type="number" id="dietCarb" placeholder="g" style="width:100%;margin-top:0.5rem;">
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Gordura</div>
+                        <input type="number" id="dietFat" placeholder="g" style="width:100%;margin-top:0.5rem;">
+                    </div>
+                </div>
+
+                <button class="btn" onclick="saveDietMacros()">💾 Salvar Metas</button>
+
+                <div class="form-group" style="margin-top:1rem;">
+                    <label>Sua dieta (texto)</label>
+                    <textarea id="customDiet" style="min-height:200px;"
+                        placeholder="Ex:
+Café: 4 ovos + pão
+Almoço: 300g arroz + 150g frango
+...
+Ou só macros e regras: sem fritura, 2L água, etc."></textarea>
+                </div>
+
+                <button class="btn" onclick="saveCustomDiet()">💾 Salvar Dieta</button>
+                <button class="btn btn-secondary" type="button" onclick="clearDiet()" style="margin-left:0.5rem;">🗑 Limpar Dieta</button>
+                <button class="btn btn-secondary" onclick="clearCustomDiet()" style="margin-left:0.5rem;">🗑 Limpar</button>
+
+                <div id="dietStatus" style="margin-top:1rem;color:var(--color-text-muted);font-size:0.85rem;"></div>
+            </div>
+        </div>
+
+
+        <!-- LOGBOOK -->
+        <div id="logbook" class="section">
+            <div class="card">
+                <h3>Logbook</h3>
+
+                <div class="form-group">
+                    <label>Dia do Treino</label>
+                    <select id="logDaySelect" onchange="onLogDayChange()"></select>
+                    <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:0.5rem;">
+                        O Logbook carrega os exercícios do dia escolhido com base na sua Rotina.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Treino Detectado</label>
+                    <input type="text" id="autoWorkoutName" readonly style="font-weight:600;color:var(--color-primary);">
+                </div>
+
+                <div class="card" style="padding:1rem;margin-bottom:1rem;background:var(--color-bg);border:1px solid rgba(255,255,255,0.1);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                        <div>
+                            <div style="font-size:0.75rem;color:var(--color-text-muted);">⏱️ Tempo de Treino</div>
+                            <div id="workoutTimerDisplay" style="font-size:1.5rem;font-weight:700;letter-spacing:0.5px;">00:00:00</div>
+                        </div>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <button class="btn" id="timerStartBtn" onclick="startWorkoutTimer()">Iniciar</button>
+                            <button class="btn btn-secondary" id="timerPauseBtn" onclick="toggleWorkoutTimer()" disabled>Pausar</button>
+                            <button class="btn btn-secondary" id="timerResetBtn" onclick="resetWorkoutTimer()" disabled>Reset</button>
+                        </div>
+                    </div>
+                    <div style="margin-top:0.75rem;display:flex;gap:0.75rem;align-items:flex-end;flex-wrap:wrap;">
+                        <div class="form-group" style="margin:0;min-width:160px;">
+                            <label style="font-size:0.8rem;color:var(--color-text-muted);">⏳ Descanso padrão (seg)</label>
+                            <input type="number" id="restDurationSec" value="120" min="10" step="10" style="width:100%;">
+                        </div>
+                        <div style="font-size:0.8rem;color:var(--color-text-muted);margin-bottom:0.25rem;">
+                            (HEVY vibe) Use o descanso por exercício com 1 toque.
+                        </div>
+                    </div>
+                    <div style="margin-top:0.5rem;font-size:0.8rem;color:var(--color-text-muted);">
+                        Dica (estilo HEVY): inicie o timer quando começar o treino e salve no final — o tempo fica registrado no histórico.
+                    </div>
+                </div>
+                
+                <div id="exerciseInputs"></div>
+                
+                <div class="form-group" style="margin-top:1rem;">
+                    <label>Observações do Treino</label>
+                    <textarea id="workoutNotes" placeholder="Ex: Treino bom, meio cansado mas bom..."></textarea>
+                </div>
+                
+                <button class="btn" onclick="addWorkout()">Salvar Treino</button>
+            </div>
+
+            <div class="card">
+                <h3>Histórico de Treinos</h3>
+                <div id="workoutList"></div>
+            </div>
+        
+            <div class="card">
+                <h3>📈 Histórico por Exercício</h3>
+                <div class="form-group">
+                    <label>Escolha o exercício</label>
+                    <input type="text" id="exerciseSearch" placeholder="Digite para filtrar (ex: supino)" oninput="filterExerciseOptions()" style="margin-bottom:0.75rem;">
+                    <select id="exerciseSelect" onchange="renderExerciseHistory()"></select>
+                </div>
+                <div id="exerciseHistoryPanel"></div>
+            </div>
+</div>
+
+        <!-- ANÁLISE -->
+        <div id="analise" class="section">
+            <div class="card">
+                <h3>Volume Semanal</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Esta Semana</div>
+                        <div class="stat-value" id="weeklyVolume">0 kg</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Semana Passada</div>
+                        <div class="stat-value" id="lastWeekVolume">0 kg</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Tendência</div>
+                        <div class="stat-value" id="volumeTrend">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Treinos</div>
+                        <div class="stat-value" id="totalWorkouts">0</div>
+                    </div>
+                </div>
+                
+                <div class="volume-chart" id="volumeChart"></div>
+            </div>
+
+            <div class="card">
+                <h3>Comparação de Treinos</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterWorkoutType('all')">Todos</button>
+                    <button class="filter-btn" onclick="filterWorkoutType('T1')">T1</button>
+                    <button class="filter-btn" onclick="filterWorkoutType('T2')">T2</button>
+                    <button class="filter-btn" onclick="filterWorkoutType('T3')">T3</button>
+                    <button class="filter-btn" onclick="filterWorkoutType('L1')">L1</button>
+                    <button class="filter-btn" onclick="filterWorkoutType('L2')">L2</button>
+                </div>
+                <div id="comparisonList"></div>
+            </div>
+
+            <div class="card">
+                <h3>🏆 Recordes Pessoais</h3>
+                <div id="prList"></div>
+            </div>
+        </div>
+
+        <!-- GEMS -->
+        <div id="gems" class="section">
+            <div class="card">
+                <h3>💎 GEMS - Teu Assistente AI</h3>
+                <p style="color:var(--color-text-muted);font-size:0.875rem;margin-bottom:1rem;">
+                    GEMS é um assistente AI completo baseado no Samuel Meller + Justin Shier! Analisa automaticamente todos os dados do teu Logbook (peso, treinos, dieta, fotos) e te dá respostas personalizadas. Quanto mais tu usar o app, mais preciso ele fica!
+                </p>
+                
+                <div style="background:var(--color-bg);padding:1rem;border-radius:6px;border:1px solid var(--color-primary);margin-bottom:1rem;">
+                    <strong style="color:var(--color-primary);display:block;margin-bottom:0.5rem;">🤖 ANÁLISE AUTOMÁTICA ATIVADA!</strong>
+                    <p style="font-size:0.875rem;color:var(--color-text);line-height:1.6;margin:0;">
+                        GEMS agora analisa automaticamente:<br>
+                        ✅ Tendência de peso e composição corporal<br>
+                        ✅ Progressão de força por exercício<br>
+                        ✅ Volume semanal de treino<br>
+                        ✅ Aderência aos macros<br>
+                        ✅ Identifica problemas antes de virarem grandes<br><br>
+                        <strong>Faz tua pergunta e ele vai buscar nos teus dados reais!</strong>
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label>📋 Contexto Pessoal (Opcional - GEMS já analisa teus dados automaticamente!)</label>
+                    <textarea id="gemsContext" placeholder="OPCIONAL: Se quiser adicionar informações extras que não estão no Logbook:&#10;&#10;Ex:&#10;- Horários específicos (acordo 6h, trabalho 8-18h)&#10;- Preferências alimentares (odeio brócolis, amo batata doce)&#10;- Observações pessoais (durmo mal, stress alto no trabalho)&#10;- Qualquer coisa que queira que o GEMS saiba&#10;&#10;GEMS já tem acesso a:&#10;✓ Todos teus treinos e progressões&#10;✓ Todas tuas medidas e peso&#10;✓ Toda tua dieta registrada&#10;✓ Tuas fotos de progresso&#10;✓ Histórico de refeeds e deloads" style="min-height:180px;"></textarea>
+                </div>
+                
+                <button class="btn" onclick="saveGemsContext()">💾 Salvar Contexto Extra</button>
+                
+                <div style="margin-top:1rem;padding:1rem;background:var(--color-bg);border-radius:6px;border:1px solid rgba(255,255,255,0.1);">
+                    <strong style="color:var(--color-primary);display:block;margin-bottom:0.5rem;">💡 Exemplos de perguntas pro GEMS:</strong>
+                    <p style="font-size:0.875rem;color:var(--color-text-muted);line-height:1.6;margin:0;">
+                        <strong>📊 ANÁLISE:</strong><br>
+                        "Como tá meu progresso?" "Tô evoluindo?" "Por que não vejo resultado?"<br><br>
+                        
+                        <strong>💪 TREINO:</strong><br>
+                        "Meu supino não sobe, o que fazer?" "Treino tá fraco, por quê?"<br><br>
+                        
+                        <strong>🍽️ DIETA:</strong><br>
+                        "Tô com fome fora de hora" "Posso aumentar calorias?" "Preciso de 300 kcal ainda hoje"<br><br>
+                        
+                        <strong>⚖️ PESO:</strong><br>
+                        "Peso estagnado, e agora?" "Tô perdendo peso rápido demais?"<br><br>
+                        
+                        <strong>🎯 ESTRATÉGIAS:</strong><br>
+                        "Quando fazer refeed?" "Preciso de deload?" "Como montar minha dieta?"<br><br>
+                        
+                        <em>GEMS analisa automaticamente todos os dados do Logbook antes de responder!</em>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>💬 Chat com GEMS</h3>
+
+                <div class="card" style="background:var(--color-bg);border:1px solid rgba(255,255,255,0.12);margin-bottom:1rem;">
+                    <h3 style="margin-bottom:0.5rem;">⚙️ Motor de IA (opcional)</h3>
+                    <p style="color:var(--color-text-muted);font-size:0.85rem;line-height:1.5;margin-bottom:0.75rem;">
+                        Por padrão o GEMS roda <strong>offline</strong> (sem internet) usando teus dados do app.
+                        Se quiser conectar <strong>GPT‑5.2</strong> ou <strong>Gemini</strong>, use um <strong>proxy</strong> (recomendado) e tua chave.
+                        <br><em>Obs: colocar chave direto no GitHub Pages não é seguro.</em>
+                    </p>
+
+                    <div class="form-group">
+                        <label>Fornecedor</label>
+                        <select id="gemsProvider" onchange="saveGemsProviderSettings()">
+                            <option value="offline">Offline (regras + teus dados)</option>
+                            <option value="openai">OpenAI (GPT‑5.2 via proxy)</option>
+                            <option value="gemini">Google (Gemini via proxy)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Proxy URL (recomendado)</label>
+                        <input id="gemsProxyUrl" type="text" placeholder="Ex: https://seu-proxy.seudominio.workers.dev" onblur="saveGemsProviderSettings()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>API Key (fica salva só neste aparelho)</label>
+                        <input id="gemsApiKey" type="password" placeholder="Cole sua chave aqui" onblur="saveGemsProviderSettings()">
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="testGemsConnection()">Testar conexão</button>
+                </div>
+
+                
+                <div style="background:linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));padding:1rem;border-radius:6px;margin-bottom:1rem;border:1px solid var(--color-primary);">
+                    <div style="font-size:0.875rem;color:var(--color-text);line-height:1.6;">
+                        <strong style="color:var(--color-primary);">🔥 GEMS está analisando teus dados...</strong><br>
+                        <span id="gemsAnalysisPreview" style="font-size:0.8rem;color:var(--color-text-muted);">Carregando análise automática...</span>
+                    </div>
+                </div>
+                
+                <div id="gemsChatHistory" style="max-height:400px;overflow-y:auto;margin-bottom:1rem;"></div>
+                
+                <div class="form-group">
+                    <label>Tua Pergunta</label>
+                    <textarea id="gemsQuestion" placeholder="Ex: Como tá meu progresso? | Meu supino não sobe | Tô com fome | Posso aumentar calorias?" style="min-height:80px;"></textarea>
+                </div>
+                
+                <button class="btn" onclick="askGems()">🚀 Perguntar ao GEMS</button>
+                <button class="btn btn-secondary" onclick="clearGemsChat()" style="margin-top:0.5rem;">🗑️ Limpar Chat</button>
+                
+                <div style="margin-top:1rem;padding:0.75rem;background:var(--color-surface);border-radius:6px;border:1px solid rgba(255,255,255,0.1);">
+                    <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0;line-height:1.5;">
+                        💾 Todas as respostas são baseadas nos teus dados reais do Logbook<br>
+                        📊 Quanto mais tu usar o app, mais preciso o GEMS fica<br>
+                        🔒 Tudo processado localmente no teu celular
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- REFEEDS -->
+        <div id="refeeds" class="section">
+            <div class="card">
+                <h3>🔄 Protocolo de Refeed</h3>
+                <p style="color:var(--color-text-muted);font-size:0.875rem;margin-bottom:1rem;">
+                    Refeed = dia estratégico com MAIS carboidratos pra repor glicogênio, melhorar hormônios e quebrar adaptação metabólica.
+                </p>
+                
+                <div style="background:var(--color-bg);padding:1rem;border-radius:6px;margin-bottom:1rem;border-left:3px solid var(--color-primary);">
+                    <strong style="color:var(--color-primary);">📊 Quando fazer?</strong>
+                    <div style="font-size:0.875rem;margin-top:0.5rem;line-height:1.6;">
+                        ✅ A cada 7-14 dias em cutting<br>
+                        ✅ Quando força tá caindo muito<br>
+                        ✅ Peso estagnado há 2+ semanas<br>
+                        ❌ NÃO é dia do lixo descontrolado!
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Data do Refeed</label>
+                    <input type="date" id="refeedDate">
+                </div>
+                
+                <div class="form-group">
+                    <label>Peso no Dia (kg)</label>
+                    <input type="number" id="refeedWeight" step="0.1" placeholder="Ex: 86.5">
+                </div>
+                
+                <div class="stats-grid" style="margin-bottom:1rem;">
+                    <div class="stat-card">
+                        <div class="stat-label">Proteína</div>
+                        <div class="stat-value" id="refeedProtein" style="font-size:1.25rem;">160g</div>
+                        <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:0.25rem;">Mantém igual</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Carboidrato</div>
+                        <div class="stat-value" id="refeedCarb" style="font-size:1.25rem;">520g</div>
+                        <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:0.25rem;">~6g/kg</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Gordura</div>
+                        <div class="stat-value" id="refeedFat" style="font-size:1.25rem;">30g</div>
+                        <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:0.25rem;">Reduz pela metade</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Calorias</div>
+                        <div class="stat-value" id="refeedCals" style="font-size:1.25rem;">3150</div>
+                        <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:0.25rem;">Total</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Como foi? (percepção)</label>
+                    <select id="refeedFeeling">
+                        <option value="otimo">🔥 Ótimo - Cheio de energia depois</option>
+                        <option value="bom">✅ Bom - Ajudou na recuperação</option>
+                        <option value="normal">➡️ Normal - Não notei diferença</option>
+                        <option value="ruim">⚠️ Ruim - Me senti mal/pesado</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="refeedNotes" placeholder="Ex: Acordei 1.5kg mais pesado (água), treino do dia seguinte foi INSANO..." style="min-height:80px;"></textarea>
+                </div>
+                
+                <button class="btn" onclick="addRefeed()">Salvar Refeed</button>
+                
+                <div style="margin-top:1rem;padding:1rem;background:var(--color-bg);border-radius:6px;border:1px solid rgba(255,255,255,0.1);">
+                    <strong style="color:var(--color-primary);display:block;margin-bottom:0.5rem;">💡 Dicas Meller:</strong>
+                    <p style="font-size:0.875rem;color:var(--color-text-muted);line-height:1.6;">
+                        <strong>Alimentos:</strong> Arroz, batata, massa, pão, aveia, frutas<br>
+                        <strong>EVITA:</strong> Gordura (pizza, hambúrguer, frituras)<br>
+                        <strong>Doce?</strong> SIM, mas low fat (balas, picolé fruta, gelatina)<br>
+                        <strong>Peso vai subir:</strong> 1-2kg de água = NORMAL! Volta em 2-3 dias<br>
+                        <strong>Próximo dia:</strong> Volta pro déficit normal
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 Histórico de Refeeds</h3>
+                <div id="refeedList"></div>
+            </div>
+        </div>
+
+        <!-- DELOAD -->
+        <div id="deload" class="section">
+            <div class="card">
+                <h3>😴 Semana de Deload</h3>
+                <p style="color:var(--color-text-muted);font-size:0.875rem;margin-bottom:1rem;">
+                    Deload = semana com 40-60% do volume/intensidade normal pra recuperar de verdade. Não é descanso total!
+                </p>
+                
+                <div style="background:var(--color-bg);padding:1rem;border-radius:6px;margin-bottom:1rem;border-left:3px solid var(--color-warning);">
+                    <strong style="color:var(--color-warning);">⚠️ Quando fazer deload?</strong>
+                    <div style="font-size:0.875rem;margin-top:0.5rem;line-height:1.6;">
+                        ✅ A cada 4-6 semanas de treino pesado<br>
+                        ✅ Quando força tá caindo consistente<br>
+                        ✅ Articulações doloridas<br>
+                        ✅ Cansaço acumulado/overtraining<br>
+                        ✅ Antes de intensificar treino
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Semana de Deload</label>
+                    <input type="week" id="deloadWeek">
+                </div>
+                
+                <div class="form-group">
+                    <label>Protocolo escolhido</label>
+                    <select id="deloadProtocol">
+                        <option value="volume">Volume Reduzido (50% séries, mesma carga)</option>
+                        <option value="intensidade">Intensidade Reduzida (60% carga, mesmas séries)</option>
+                        <option value="completo">Completo (50% volume + 60% carga)</option>
+                        <option value="ativo">Descanso Ativo (caminhada, mobilidade)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Como se sentiu durante?</label>
+                    <textarea id="deloadFeeling" placeholder="Ex: Semana chata mas necessária, articulações melhoraram muito..." style="min-height:80px;"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Resultado pós-deload</label>
+                    <select id="deloadResult">
+                        <option value="excelente">🔥 Excelente - Voltei muito mais forte</option>
+                        <option value="bom">✅ Bom - Recuperei bem</option>
+                        <option value="normal">➡️ Normal - Ajudou um pouco</option>
+                        <option value="ruim">⚠️ Ruim - Ainda cansado</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="addDeload()">Salvar Deload</button>
+                
+                <div style="margin-top:1rem;padding:1rem;background:var(--color-bg);border-radius:6px;border:1px solid rgba(255,255,255,0.1);">
+                    <strong style="color:var(--color-warning);display:block;margin-bottom:0.5rem;">💡 Filosofia Meller:</strong>
+                    <p style="font-size:0.875rem;color:var(--color-text-muted);line-height:1.6;">
+                        <strong>Não é fraqueza:</strong> Guri inteligente deloada, burro fica lesionado<br>
+                        <strong>Calorias:</strong> MANTÉM ou aumenta um pouco (não corta!)<br>
+                        <strong>Proteína:</strong> Mantém alta (2g/kg)<br>
+                        <strong>Sono:</strong> Prioriza dormir mais nessa semana<br>
+                        <strong>Próxima semana:</strong> Volta com TUDO, mais forte
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 Histórico de Deloads</h3>
+                <div id="deloadList"></div>
+            </div>
+        </div>
+
+        <!-- FÍSICO -->
+        <div id="fisico" class="section">
+            <div class="card">
+                <h3>📸 Progresso Físico</h3>
+                <p style="color:var(--color-text-muted);font-size:0.875rem;margin-bottom:1rem;">
+                    Tire fotos semanais (frente, costas, lateral) pra acompanhar evolução visual e estimar BF%.
+                </p>
+                
+                <div class="form-group">
+                    <label>Data da Foto</label>
+                    <input type="date" id="photoDate">
+                </div>
+                
+                <div class="form-group">
+                    <label>Peso no Dia (kg)</label>
+                    <input type="number" id="photoWeight" step="0.1" placeholder="Ex: 86.5">
+                </div>
+                
+                <div class="form-group">
+                    <label>Foto (Anexar ou colar URL)</label>
+                    <input type="file" id="photoFile" accept="image/*" style="margin-bottom:0.5rem;">
+                    <input type="text" id="photoUrl" placeholder="Ou cole o link da imagem aqui" style="margin-top:0.5rem;">
+                    <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:0.5rem;">
+                        📷 Anexe uma foto do seu dispositivo ou cole um link externo.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>BF% Estimado (opcional)</label>
+                    <input type="number" id="photoBf" step="0.1" placeholder="Ex: 15.5">
+                    <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:0.5rem;">
+                        Deixe vazio se quiser estimar visualmente depois.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="photoNotes" placeholder="Ex: Acordei bem inchado, meio flat..." style="min-height:80px;"></textarea>
+                </div>
+                
+                <button class="btn" onclick="addPhotoProgress()">Salvar Progresso</button>
+            </div>
+
+            <div class="card">
+                <h3>📊 Linha do Tempo</h3>
+                <div id="photoTimeline"></div>
+            </div>
+        
+        <!-- INSIGHTS -->
+        <div id="insights" class="section">
+            <div class="card">
+                <h3>📊 Insights (estilo Samuel)</h3>
+                <p style="color:var(--color-text-muted);font-size:0.875rem;margin-bottom:1rem;">
+                    Resumo semanal, aderência à rotina e PRs. Foco no que realmente move o ponteiro: consistência + progressão.
+                </p>
+
+                <div class="stats-grid" style="margin-bottom:1rem;">
+                    <div class="stat-card">
+                        <div class="stat-label">Sessões (7 dias)</div>
+                        <div class="stat-value" id="wkSessions">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Aderência à rotina</div>
+                        <div class="stat-value" id="wkAdherence">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Volume (7 dias)</div>
+                        <div class="stat-value" id="wkVolume">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">PRs (7 dias)</div>
+                        <div class="stat-value" id="wkPRs">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Streak (≥80%)</div>
+                        <div class="stat-value" id="wkStreak">0</div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding:1rem;background:var(--color-bg);border:1px solid rgba(255,255,255,0.1);">
+                    <h4 style="margin:0 0 0.75rem 0;">🔥 PRs recentes</h4>
+                    <div id="prFeed"></div>
+                </div>
+
+                <div class="card" style="padding:1rem;margin-top:1rem;background:var(--color-bg);border:1px solid rgba(255,255,255,0.1);">
+                    <h4 style="margin:0 0 0.75rem 0;">✅ Checklist semanal (Rotina)</h4>
+                    <div id="weekChecklist"></div>
+                    <div style="margin-top:0.75rem;color:var(--color-text-muted);font-size:0.85rem;">
+                        Baseado nos dias definidos na sua Rotina. Marcação automática quando você salva um treino no dia.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        </div>
+    </div>
+
+    <script>
+// Minimal runtime guard
+window.addEventListener('error', (e) => {
+  const banner = document.getElementById('runtimeErrorBanner');
+  if (banner) { banner.style.display = 'block'; banner.textContent = 'Erro de script: ' + (e?.message || 'desconhecido'); }
+});
+
+        // Initialize data
+        let data = {
+            macros: { protein: 160, carb: 315, fat: 55, calories: 2700 },
+            meals: [],
+            measurements: [],
+            workouts: [],
+            photos: [],
+            refeeds: [],
+            deloads: [],
+            gemsContext: '',
+            gemsChat: [],
+            lastPhotoReminder: null,
+            lastMeasureReminder: null,
+            notificationsEnabled: false
+        };
+
+        let exerciseCount = 0;
+        let currentFilter = 'all';
+
+        // Load data from localStorage
+        function loadData() {
+            migrateStorageOnce();
+            const saved = localStorage.getItem('guriDoLowData');
+            if (saved) {
+                data = JSON.parse(saved);
+            }
+            updateDashboard();
+            renderMeals();
+            renderMeasurements();
+            renderWorkouts();
+            renderRefeeds();
+            renderDeloads();
+            updateRefeedCalculator();
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('guriDoLowData', JSON.stringify(data));
+        }
+
+        // Tab switching
+        
+        function showTab(tabName, clickedButton) {
+            try {
+                const target = document.getElementById(tabName);
+                if (!target) {
+                    console.warn('Tab section not found:', tabName);
+                    return;
+                }
+
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+                target.classList.add('active');
+                if (clickedButton) clickedButton.classList.add('active');
+
+                // On-open hooks (guarded)
+                if (tabName === 'analise' && typeof renderAnalysis === 'function') {
+                    renderAnalysis();
+                }
+                if (tabName === 'fisico') {
+                    if (typeof renderPhysique === 'function') renderPhysique();
+                    if (typeof renderPhotoTimeline === 'function') renderPhotoTimeline(); // legacy
+                }
+                if (tabName === 'logbook') {
+                    if (typeof populateLogDaySelect === 'function') populateLogDaySelect();
+                    if (typeof initializeExercises === 'function') initializeExercises();
+                }
+                if (tabName === 'dashboard' || tabName === 'diario') {
+                    if (typeof updateDiaryReferences === 'function') updateDiaryReferences();
+                }
+            } catch (e) {
+                console.error('showTab error:', e);
+                alert('ERRO AO TROCAR DE ABA. RECARREGUE A PÁGINA.');
+            }
+        }
+
+// ===== Streak semanal (>=80% de aderência) =====
+function calculateStreak80() {
+    const routineDays = getRoutineDaysList();
+    if (!routineDays.length) return 0;
+
+    const weeks = {};
+    (data.workouts || []).forEach(w => {
+        const d = new Date(w.date);
+        const year = d.getFullYear();
+        const week = Math.floor((d - new Date(year,0,1)) / (7*24*60*60*1000));
+        const key = `${year}-${week}`;
+        weeks[key] = weeks[key] || new Set();
+        weeks[key].add(workoutDayFromDateStr(w.date));
+    });
+
+    const keys = Object.keys(weeks).sort().reverse();
+    let streak = 0;
+    for (const k of keys) {
+        const adherence = weeks[k].size / routineDays.length;
+        if (adherence >= 0.8) streak++;
+        else break;
+    }
+    return streak;
+}
+
+// ===== Compare fotos lado a lado =====
+async function populateCompareSelects() {
+    const selA = document.getElementById('compareA');
+    const selB = document.getElementById('compareB');
+    if (!selA || !selB) return;
+
+    const photos = await getAllPhysiquePhotos();
+    photos.sort((a,b) => parseInt(b.id.split('-')[0]) - parseInt(a.id.split('-')[0]));
+
+    selA.innerHTML = '';
+    selB.innerHTML = '';
+    photos.forEach(p => {
+        const label = new Date(p.date).toLocaleDateString('pt-BR');
+        const oa = document.createElement('option');
+        oa.value = p.id;
+        oa.textContent = label;
+        selA.appendChild(oa);
+
+        const ob = document.createElement('option');
+        ob.value = p.id;
+        ob.textContent = label;
+        selB.appendChild(ob);
+    });
+}
+
+async function comparePhotos() {
+    const aId = document.getElementById('compareA')?.value;
+    const bId = document.getElementById('compareB')?.value;
+    const out = document.getElementById('compareResult');
+    if (!aId || !bId || !out) return;
+
+    const photos = await getAllPhysiquePhotos();
+    const a = photos.find(p => p.id === aId);
+    const b = photos.find(p => p.id === bId);
+    if (!a || !b) return;
+
+    out.innerHTML = `
+        <div style="flex:1;min-width:200px;">
+            <div style="margin-bottom:0.5rem;">Antes</div>
+            <img src="${a.dataUrl}" style="width:100%;border-radius:8px;">
+        </div>
+        <div style="flex:1;min-width:200px;">
+            <div style="margin-bottom:0.5rem;">Depois</div>
+            <img src="${b.dataUrl}" style="width:100%;border-radius:8px;">
+        </div>
+    `;
+}
+
+// ===== Limpar rotina/dieta =====
+function clearRoutine() {
+    if (!confirm('Limpar a rotina salva neste dispositivo?')) return;
+    localStorage.removeItem('customRoutineText');
+    const ta = document.getElementById('customRoutine');
+    if (ta) ta.value = '';
+    updateRoutinePreview();
+    populateLogDaySelect();
+    initializeExercises();
+    updateDiaryReferences();
+    alert('Rotina limpa ✅');
+}
+
+function clearDiet() {
+    if (!confirm('Limpar a dieta/metas salvas neste dispositivo?')) return;
+    localStorage.removeItem('customDietText');
+    const ta = document.getElementById('customDiet');
+    if (ta) ta.value = '';
+    if (typeof data !== 'undefined') {
+        data.macros = { calories: 0, protein: 0, carb: 0, fat: 0 };
+        saveData();
+    }
+    updateDiaryReferences();
+    alert('Dieta limpa ✅');
+}
+
+</script>
+</body>
+</html>
