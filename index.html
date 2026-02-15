@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>LOGBOOK</title>
+  <style>
+    :root{
+      --bg:#050509;
+      --surface:#0d0d14;
+      --surface2:#0a0a10;
+      --primary:#ff1b1b;
+      --text:#f5f5f7;
+      --muted:#9aa0a6;
+      --border:rgba(255,255,255,.14);
+      --shadow:0 10px 24px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+      background:radial-gradient(1200px 700px at 30% -10%, rgba(255,27,27,.12), transparent 60%),
+                 radial-gradient(1000px 600px at 110% 0%, rgba(255,27,27,.10), transparent 55%),
+                 var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    header{
+      position:sticky; top:0; z-index:30;
+      padding:14px 16px;
+      background:linear-gradient(180deg, rgba(13,13,20,.92), rgba(13,13,20,.78));
+      border-bottom:1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+    header .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    header h1{
+      font-size:16px; letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--text);
+      display:flex; align-items:center; gap:10px;
+    }
+    header h1 .dot{
+      width:10px;height:10px;border-radius:999px;background:var(--primary);
+      box-shadow:0 0 0 6px rgba(255,27,27,.12);
+    }
+    header .small{font-size:12px;color:var(--muted)}
+
+    main{
+      padding:14px 14px 84px;
+      max-width:980px;
+      margin:0 auto;
+    }
+
+    .section{display:none}
+    .section.active{display:block}
+
+    .card{
+      background:linear-gradient(180deg, rgba(13,13,20,.95), rgba(10,10,16,.92));
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      box-shadow:var(--shadow);
+      margin-bottom:14px;
+    }
+    .card h3{
+      font-size:14px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.92);
+      margin-bottom:10px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .subtle{font-size:12px;color:var(--muted);line-height:1.35}
+    .kpi{
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.35);
+      padding:10px 12px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:8px 0;
+      gap:12px;
+    }
+    .kpi .label{font-size:12px;color:var(--muted)}
+    .kpi .value{font-size:16px;font-weight:800}
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .row>*{flex:1; min-width:140px}
+
+    input,select,textarea{
+      width:100%;
+      padding:11px 12px;
+      background:rgba(0,0,0,.28);
+      border:1px solid var(--border);
+      color:var(--text);
+      border-radius:14px;
+      outline:none;
+      transition:transform .08s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    textarea{min-height:120px; resize:vertical}
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(255,27,27,.55);
+      box-shadow:0 0 0 4px rgba(255,27,27,.10);
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid transparent;
+      border-radius:14px;
+      padding:11px 12px;
+      cursor:pointer;
+      font-weight:800;
+      letter-spacing:.02em;
+      transition:transform .08s ease, filter .15s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      width:100%;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      background:linear-gradient(180deg, rgba(255,27,27,.95), rgba(185,0,0,.95));
+      color:#09090b;
+    }
+    .btn.primary:hover{filter:brightness((1.03)}
+    .btn.secondary{
+      background:transparent;
+      border-color:var(--border);
+      color:var(--text);
+    }
+    .btn.secondary:hover{border-color:rgba(255,255,255,.25)}
+    .btn.small{
+      padding:9px 10px;
+      border-radius:12px;
+      font-size:13px;
+      width:auto;
+    }
+
+    nav{
+      position:fixed; left:0; right:0; bottom:0; z-index:40;
+      background:linear-gradient(180deg, rgba(10,10,16,.72), rgba(10,10,16,.92));
+      backdrop-filter: blur(10px);
+      border-top:1px solid var(--border);
+      padding:10px 10px calc(10px + env(safe-area-inset-bottom));
+    }
+    nav .tabs{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    nav .tabs::-webkit-scrollbar{display:none}
+    nav button{
+      flex:0 0 auto;
+      border:none;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      color:rgba(255,255,255,.78);
+      padding:10px 12px;
+      font-weight:800;
+      font-size:12px;
+      letter-spacing:.02em;
+      cursor:pointer;
+      transition:background .15s ease, color .15s ease, transform .08s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    nav button:active{transform:translateY(1px)}
+    nav button.active{
+      background:rgba(255,27,27,.92);
+      color:#0b0b10;
+      box-shadow:0 8px 18px rgba(255,27,27,.16);
+    }
+
+    .divider{height:1px;background:var(--border);margin:10px 0}
+
+    canvas{
+      width:100%;
+      height:240px;
+      display:block;
+      background:rgba(0,0,0,.35);
+      border:1px solid var(--border);
+      border-radius:14px;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:74px;
+      transform:translateX(-50%) translateY(20px);
+      z-index:60;
+      background:rgba(0,0,0,.78);
+      border:1px solid rgba(255,255,255,.16);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:999px;
+      box-shadow:0 12px 30px rgba(0,0,0,.45);
+      display:flex;
+      align-items:center;
+      gap:10px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease, transform .2s ease;
+      max-width:min(92vw, 520px);
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+      pointer-events:auto;
+    }
+    .toast .pill{
+      width:10px;height:10px;border-radius:999px;background:var(--primary);
+      box-shadow:0 0 0 6px rgba(255,27,27,.10);
+      flex:0 0 auto;
+    }
+    .toast .msg{
+      font-size:13px;
+      line-height:1.25;
+      color:rgba(255,255,255,.92);
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .toast .x{
+      margin-left:auto;
+      background:transparent;
+      border:1px solid rgba(255,255,255,.18);
+      color:rgba(255,255,255,.85);
+      border-radius:999px;
+      padding:6px 8px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    img.thumb{
+      width:88px;height:88px; object-fit:cover;
+      border-radius:14px;
+      border:1px solid var(--border);
+      margin:6px 6px 0 0;
+    }
+
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      font-size:12px;
+      color:rgba(255,255,255,.82);
+      white-space:pre-wrap;
+      line-height:1.35;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <h1><span class="dot" aria-hidden="true"></span> LOGBOOK</h1>
+      <div class="small" id="todayLabel">—</div>
+    </div>
+  </header>
+
+  <main>
+    <section id="dashboard" class="section active" aria-label="Dashboard">
+      <div class="card">
+        <h3>Resumo <span class="subtle" id="stateInfo"></span></h3>
+        <div class="kpi"><div class="label">Sessões salvas</div><div class="value" id="kpiSessions">0</div></div>
+        <div class="kpi"><div class="label">Sessões na semana</div><div class="value" id="kpiWeekSessions">0</div></div>
+        <div class="kpi"><div class="label">Volume semana</div><div class="value" id="kpiWeekVolume">0</div></div>
+        <div class="divider"></div>
+        <div class="subtle">Placeholder: este arquivo está válido e com toast; a V2 completa será gerada pelo GPT builder com todos os módulos.</div>
+      </div>
+
+      <div class="card">
+        <h3>Volume por sessão</h3>
+        <canvas id="chartVolume" width="900" height="260"></canvas>
+        <div class="subtle" style="margin-top:10px;">Gráfico simples offline (sem libs).</div>
+      </div>
+    </section>
+
+    <section id="rotina" class="section" aria-label="Rotina">
+      <div class="card">
+        <h3>Rotina semanal</h3>
+        <textarea id="routineText" placeholder="Ex:
+Segunda
+Supino reto 2x5-9, 1x8-10
+Agachamento 3x6-8
+
+Terça
+Puxada 3x8-12"></textarea>
+        <div class="row">
+          <button class="btn primary" type="button" id="btnSaveRoutine">Salvar rotina</button>
+          <button class="btn secondary" type="button" id="btnPreviewRoutine">Prévia</button>
+        </div>
+        <div class="divider"></div>
+        <div id="routinePreview" class="mono"></div>
+      </div>
+    </section>
+
+    <section id="logbook" class="section" aria-label="Logbook">
+      <div class="card">
+        <h3>Treino de hoje</h3>
+        <textarea id="sessionNotes" placeholder="Observações do treino..."></textarea>
+        <button class="btn primary" type="button" id="btnSaveSession">Salvar sessão</button>
+        <div class="subtle" style="margin-top:10px;">Placeholder: a V2 vai puxar exercícios do dia automaticamente e gerar sets com kg/reps/RIR.</div>
+      </div>
+    </section>
+
+    <section id="semanas" class="section" aria-label="Semanas">
+      <div class="card">
+        <h3>Semanas registradas</h3>
+        <div id="weeksList" class="subtle">—</div>
+      </div>
+    </section>
+
+    <section id="dieta" class="section" aria-label="Dieta">
+      <div class="card">
+        <h3>Metas</h3>
+        <div class="row">
+          <input id="targetP" type="number" inputmode="decimal" placeholder="Proteína (g)" />
+          <input id="targetC" type="number" inputmode="decimal" placeholder="Carbo (g)" />
+          <input id="targetF" type="number" inputmode="decimal" placeholder="Gordura (g)" />
+        </div>
+        <button class="btn primary" type="button" id="btnSaveDietTargets">Salvar metas</button>
+        <div class="subtle" style="margin-top:10px;">Placeholder: a V2 terá subabas por refeição e total diário.</div>
+      </div>
+    </section>
+
+    <section id="tdee" class="section" aria-label="TDEE">
+      <div class="card">
+        <h3>Calcular TDEE</h3>
+        <div class="row">
+          <select id="sex">
+            <option value="male">Masculino</option>
+            <option value="female">Feminino</option>
+          </select>
+          <input id="age" type="number" inputmode="numeric" placeholder="Idade" />
+        </div>
+        <div class="row">
+          <input id="height" type="number" inputmode="numeric" placeholder="Altura (cm)" />
+          <input id="weight" type="number" inputmode="decimal" placeholder="Peso (kg)" />
+        </div>
+        <select id="activity">
+          <option value="1.2">Atividade 1.2 (Sedentário)</option>
+          <option value="1.375">Atividade 1.375 (Leve)</option>
+          <option value="1.55">Atividade 1.55 (Moderado)</option>
+          <option value="1.725">Atividade 1.725 (Alto)</option>
+          <option value="1.9">Atividade 1.9 (Muito alto)</option>
+        </select>
+        <button class="btn primary" type="button" id="btnCalcTdee">Calcular</button>
+        <div class="divider"></div>
+        <div class="subtle" id="tdeeResult">—</div>
+        <div class="subtle" style="margin-top:10px;">Placeholder: a V2 terá sliders por kg e “Aplicar na Dieta (data selecionada)”.</div>
+      </div>
+    </section>
+
+    <section id="fisico" class="section" aria-label="Físico">
+      <div class="card">
+        <h3>Fotos</h3>
+        <div class="row">
+          <input type="date" id="photoDate" />
+          <input type="file" id="photoFile" accept="image/*" />
+        </div>
+        <button class="btn primary" type="button" id="btnSavePhoto">Salvar</button>
+        <div class="divider"></div>
+        <div id="gallery"></div>
+      </div>
+    </section>
+
+    <section id="medidas" class="section" aria-label="Medidas">
+      <div class="card">
+        <h3>Registrar medidas</h3>
+        <div class="row">
+          <input type="date" id="measureDate" />
+          <input type="number" inputmode="decimal" id="measureWeight" placeholder="Peso (kg)" />
+        </div>
+        <button class="btn primary" type="button" id="btnSaveMeasure">Salvar</button>
+        <div class="divider"></div>
+        <canvas id="measureChart" width="900" height="260"></canvas>
+      </div>
+    </section>
+
+    <section id="gems" class="section" aria-label="GEMS">
+      <div class="card">
+        <h3>Gems</h3>
+        <div class="row">
+          <input type="date" id="gemDate" />
+        </div>
+        <textarea id="gemText" placeholder="Escreva uma GEM..."></textarea>
+        <button class="btn primary" type="button" id="btnSaveGem">Salvar</button>
+        <div class="divider"></div>
+        <div id="gemsList" class="subtle">—</div>
+      </div>
+    </section>
+
+    <section id="insights" class="section" aria-label="Insights">
+      <div class="card">
+        <h3>Consultoria</h3>
+        <button class="btn primary" type="button" id="btnGenerateInsights">Gerar insight</button>
+        <div class="divider"></div>
+        <div id="insightText" class="subtle">—</div>
+      </div>
+    </section>
+
+    <section id="backup" class="section" aria-label="Backup">
+      <div class="card">
+        <h3>Backup</h3>
+        <div class="row">
+          <button class="btn primary" type="button" id="btnExportBackup">Exportar JSON</button>
+          <button class="btn secondary" type="button" id="btnResetApp">Resetar</button>
+        </div>
+        <div class="divider"></div>
+        <input type="file" id="importFile" accept="application/json" />
+        <button class="btn secondary" type="button" id="btnImportBackup">Importar</button>
+        <div class="subtle" style="margin-top:10px;">Exporta/Importa o estado completo em JSON.</div>
+      </div>
+    </section>
+  </main>
+
+  <nav aria-label="Navegação">
+    <div class="tabs">
+      <button type="button" class="active" data-tab="dashboard">Dashboard</button>
+      <button type="button" data-tab="rotina">Rotina</button>
+      <button type="button" data-tab="logbook">Logbook</button>
+      <button type="button" data-tab="semanas">Semanas</button>
+      <button type="button" data-tab="dieta">Dieta</button>
+      <button type="button" data-tab="tdee">TDEE</button>
+      <button type="button" data-tab="fisico">Físico</button>
+      <button type="button" data-tab="medidas">Medidas</button>
+      <button type="button" data-tab="gems">GEMS</button>
+      <button type="button" data-tab="insights">Insights</button>
+      <button type="button" data-tab="backup">Backup</button>
+    </div>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+    <span class="pill" aria-hidden="true"></span>
+    <span class="msg" id="toastMsg">—</span>
+    <button class="x" type="button" id="toastClose" aria-label="Fechar">✕</button>
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      const STORAGE_KEY = "LOGBOOK_V2_PLACEHOLDER";
+      const $ = (id) => document.getElementById(id);
+
+      let toastTimer = null;
+      function showToast(message, durationMs){
+        const t = $("toast");
+        const msg = $("toastMsg");
+        msg.textContent = String(message || "");
+        t.classList.add("show");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          t.classList.remove("show");
+        }, Math.max(1200, durationMs || 2200));
+      }
+
+      $("toastClose").addEventListener("click", () => {
+        $("toast").classList.remove("show");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = null;
+      });
+
+      function todayISO(){
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + day;
+      }
+
+      function startOfWeekISO(date){
+        const d = new Date(date);
+        const dow = d.getDay(); // 0..6 (Sun..Sat)
+        const diff = (dow === 0 ? -6 : 1 - dow); // Monday start
+        d.setDate(d.getDate() + diff);
+        d.setHours(0,0,0,0);
+        return d.toISOString().slice(0,10);
+      }
+
+      function safeParseJSON(s){
+        try { return JSON.parse(s); } catch { return null; }
+      }
+
+      let state = {
+        version: 2,
+        routine: "",
+        sessions: [],
+        dietTargets: { P:"", C:"", F:"" },
+        measures: [],
+        photos: [],
+        gems: []
+      };
+
+      function saveState(){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function loadState(){
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = safeParseJSON(raw);
+        if (!parsed || typeof parsed !== "object") return;
+        state = Object.assign({}, state, parsed);
+        if (!state.version) state.version = 2;
+      }
+
+      function switchTab(tabId){
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+        const section = document.getElementById(tabId);
+        if (section) section.classList.add("active");
+
+        document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+        const btn = document.querySelector('nav button[data-tab="' + CSS.escape(tabId) + '"]');
+        if (btn) btn.classList.add("active");
+      }
+
+      document.querySelectorAll("nav button[data-tab]").forEach(btn=>{
+        btn.addEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
+      });
+
+      function renderRoutinePreview(){
+        $("routinePreview").textContent = state.routine ? state.routine.trim() : "";
+      }
+
+      function saveRoutine(){
+        state.routine = String($("routineText").value || "");
+        saveState();
+        renderRoutinePreview();
+        showToast("Rotina salva.");
+      }
+
+      function previewRoutine(){
+        renderRoutinePreview();
+        showToast(state.routine ? "Prévia atualizada." : "Sem rotina salva.");
+      }
+
+      function saveSession(){
+        const item = {
+          date: todayISO(),
+          notes: String($("sessionNotes").value || "")
+        };
+        state.sessions.push(item);
+        saveState();
+        updateDashboard();
+        renderWeeksList();
+        drawVolumeChart();
+        showToast("Sessão salva.");
+      }
+
+      function saveDietTargets(){
+        state.dietTargets = {
+          P: String($("targetP").value || ""),
+          C: String($("targetC").value || ""),
+          F: String($("targetF").value || "")
+        };
+        saveState();
+        showToast("Metas salvas.");
+      }
+
+      function calcTDEE(){
+        const sex = $("sex").value;
+        const age = Number($("age").value || 0);
+        const height = Number($("height").value || 0);
+        const weight = Number($("weight").value || 0);
+        const activity = Number($("activity").value || 1.2);
+
+        if (!(age > 0 && height > 0 && weight > 0)){
+          showToast("Preencha idade, altura e peso.");
+          return;
+        }
+        const bmr = (sex === "male")
+          ? (10 * weight + 6.25 * height - 5 * age + 5)
+          : (10 * weight + 6.25 * height - 5 * age - 161);
+
+        const tdee = bmr * activity;
+        $("tdeeResult").textContent = "BMR: " + Math.round(bmr) + " kcal | TDEE: " + Math.round(tdee) + " kcal";
+        showToast("TDEE calculado.");
+      }
+
+      function savePhoto(){
+        const file = $("photoFile").files && $("photoFile").files[0];
+        const date = $("photoDate").value || todayISO();
+        if (!file){
+          showToast("Selecione uma imagem.");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          state.photos.push({ date: date, src: String(e.target.result || "") });
+          saveState();
+          renderGallery();
+          showToast("Foto salva.");
+          $("photoFile").value = "";
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function renderGallery(){
+        const el = $("gallery");
+        el.innerHTML = "";
+        const list = Array.isArray(state.photos) ? state.photos.slice() : [];
+        if (list.length === 0){
+          const d = document.createElement("div");
+          d.className = "subtle";
+          d.textContent = "Nenhuma foto salva.";
+          el.appendChild(d);
+          return;
+        }
+        list.reverse().forEach(p=>{
+          const img = document.createElement("img");
+          img.className = "thumb";
+          img.alt = "Foto " + (p.date || "");
+          img.src = p.src || "";
+          el.appendChild(img);
+        });
+      }
+
+      function saveMeasure(){
+        const date = $("measureDate").value || todayISO();
+        const weight = Number($("measureWeight").value || 0);
+        if (!(weight > 0)){
+          showToast("Informe o peso.");
+          return;
+        }
+        state.measures.push({ date: date, weight: weight });
+        saveState();
+        drawMeasureChart();
+        showToast("Medida salva.");
+        $("measureWeight").value = "";
+      }
+
+      function drawMeasureChart(){
+        const canvas = $("measureChart");
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0,0,w,h);
+
+        const data = Array.isArray(state.measures) ? state.measures.slice().sort((a,b)=> String(a.date||"").localeCompare(String(b.date||""))) : [];
+        if (data.length === 0){
+          ctx.fillStyle = "rgba(255,255,255,.35)";
+          ctx.font = "14px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+          ctx.fillText("Sem dados.", 14, 26);
+          return;
+        }
+
+        const vals = data.map(d => Number(d.weight || 0)).filter(v => isFinite(v));
+        const min = Math.min.apply(null, vals);
+        const max = Math.max.apply(null, vals);
+        const pad = 20;
+
+        const xStep = (w - pad*2) / Math.max(1, data.length - 1);
+        const yScale = (h - pad*2) / Math.max(1e-6, (max - min));
+
+        ctx.strokeStyle = "rgba(255,255,255,.18)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pad, h - pad);
+        ctx.lineTo(w - pad, h - pad);
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgba(255,27,27,.9)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i=0;i<data.length;i++){
+          const v = Number(data[i].weight || 0);
+          const x = pad + i * xStep;
+          const y = (h - pad) - (v - min) * yScale;
+          if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(255,27,27,.9)";
+        for (let i=0;i<data.length;i++){
+          const v = Number(data[i].weight || 0);
+          const x = pad + i * xStep;
+          const y = (h - pad) - (v - min) * yScale;
+          ctx.beginPath();
+          ctx.arc(x,y,3.5,0,Math.PI*2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = "rgba(255,255,255,.5)";
+        ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+        ctx.fillText(min.toFixed(1) + " kg", 12, h - 8);
+        ctx.fillText(max.toFixed(1) + " kg", 12, 16);
+      }
+
+      function saveGem(){
+        const date = $("gemDate").value || todayISO();
+        const text = String($("gemText").value || "").trim();
+        if (!text){
+          showToast("Escreva uma GEM.");
+          return;
+        }
+        state.gems.push({ date: date, text: text });
+        saveState();
+        renderGems();
+        showToast("GEM salva.");
+        $("gemText").value = "";
+      }
+
+      function escapeHTML(s){
+        return String(s)
+          .replace(/&/g,"&amp;")
+          .replace(/</g,"&lt;")
+          .replace(/>/g,"&gt;")
+          .replace(/"/g,"&quot;")
+          .replace(/'/g,"&#39;");
+      }
+
+      function renderGems(){
+        const el = $("gemsList");
+        el.innerHTML = "";
+        const items = Array.isArray(state.gems) ? state.gems.slice().sort((a,b)=> String(b.date||"").localeCompare(String(a.date||""))) : [];
+        if (items.length === 0){
+          el.textContent = "Nenhuma GEM ainda.";
+          return;
+        }
+        for (let i=0;i<Math.min(items.length, 50);i++){
+          const g = items[i];
+          const div = document.createElement("div");
+          div.className = "kpi";
+          div.innerHTML = '<div><div class="label">' + escapeHTML(g.date || "") + '</div><div class="value" style="font-size:13px;font-weight:700">' + escapeHTML(g.text || "") + '</div></div>';
+          el.appendChild(div);
+        }
+      }
+
+      function generateInsights(){
+        const sessions = Array.isArray(state.sessions) ? state.sessions : [];
+        const thisWeekStart = startOfWeekISO(new Date());
+        const weekSessions = sessions.filter(s => String(s.date || "") >= thisWeekStart).length;
+
+        let msg = "Mantenha consistência: pequenas vitórias diárias > perfeição.";
+        if (weekSessions === 0) msg = "Prioridade: fazer 1 sessão esta semana. Só comece.";
+        else if (weekSessions < 3) msg = "Você tem " + weekSessions + " sessão(ões) esta semana. Mire em 3+.";
+        else msg = "Boa: " + weekSessions + " sessão(ões) na semana. Agora foque em progressão pequena.";
+
+        $("insightText").textContent = msg;
+        showToast("Insight gerado.");
+      }
+
+      function exportBackup(){
+        const data = JSON.stringify(state, null, 2);
+        const blob = new Blob([data], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "logbook_backup.json";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+        showToast("Backup exportado.");
+      }
+
+      function importBackup(){
+        const file = $("importFile").files && $("importFile").files[0];
+        if (!file){
+          showToast("Selecione um arquivo JSON.");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const parsed = safeParseJSON(String(e.target.result || ""));
+          if (!parsed || typeof parsed !== "object"){
+            showToast("JSON inválido.");
+            return;
+          }
+          state = Object.assign({
+            version: 2,
+            routine: "",
+            sessions: [],
+            dietTargets: { P:"", C:"", F:"" },
+            measures: [],
+            photos: [],
+            gems: []
+          }, parsed);
+
+          if (!state.version) state.version = 2;
+          saveState();
+          hydrateUI();
+          showToast("Backup importado.");
+          $("importFile").value = "";
+        };
+        reader.readAsText(file);
+      }
+
+      function resetApp(){
+        localStorage.removeItem(STORAGE_KEY);
+        state = {
+          version: 2,
+          routine: "",
+          sessions: [],
+          dietTargets: { P:"", C:"", F:"" },
+          measures: [],
+          photos: [],
+          gems: []
+        };
+        hydrateUI();
+        showToast("Dados apagados.");
+      }
+
+      function updateDashboard(){
+        const sessions = Array.isArray(state.sessions) ? state.sessions : [];
+        $("kpiSessions").textContent = String(sessions.length);
+
+        const thisWeekStart = startOfWeekISO(new Date());
+        const weekSessions = sessions.filter(s => String(s.date || "") >= thisWeekStart);
+        $("kpiWeekSessions").textContent = String(weekSessions.length);
+
+        $("kpiWeekVolume").textContent = "0";
+      }
+
+      function renderWeeksList(){
+        const el = $("weeksList");
+        const sessions = Array.isArray(state.sessions) ? state.sessions : [];
+        if (sessions.length === 0){
+          el.textContent = "Nenhuma sessão registrada.";
+          return;
+        }
+        const weeks = new Map();
+        for (let i=0;i<sessions.length;i++){
+          const d = String(sessions[i].date || "");
+          if (!d) continue;
+          const start = startOfWeekISO(new Date(d));
+          weeks.set(start, (weeks.get(start) || 0) + 1);
+        }
+        const list = Array.from(weeks.entries()).sort((a,b)=> String(b[0]).localeCompare(String(a[0])));
+        el.innerHTML = "";
+        for (let i=0;i<list.length;i++){
+          const start = list[i][0];
+          const count = list[i][1];
+          const div = document.createElement("div");
+          div.className = "kpi";
+          div.innerHTML = '<div><div class="label">Semana (início)</div><div class="value">' + escapeHTML(start) + '</div></div><div class="value" style="font-size:14px">' + escapeHTML(count) + '</div>';
+          el.appendChild(div);
+        }
+      }
+
+      function drawVolumeChart(){
+        const canvas = $("chartVolume");
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0,0,w,h);
+
+        const sessions = Array.isArray(state.sessions) ? state.sessions.slice().sort((a,b)=> String(a.date||"").localeCompare(String(b.date||""))) : [];
+        if (sessions.length === 0){
+          ctx.fillStyle = "rgba(255,255,255,.35)";
+          ctx.font = "14px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+          ctx.fillText("Sem sessões para plotar.", 14, 26);
+          return;
+        }
+
+        const values = sessions.map(()=> 1);
+        const max = Math.max.apply(null, values);
+        const pad = 20;
+        const gap = 8;
+        const barW = Math.max(10, Math.floor((w - pad*2 - gap*(values.length-1)) / values.length));
+
+        ctx.fillStyle = "rgba(255,255,255,.14)";
+        ctx.fillRect(pad, h - pad, w - pad*2, 1);
+
+        for (let i=0;i<values.length;i++){
+          const v = values[i];
+          const x = pad + i * (barW + gap);
+          const bh = (h - pad*2) * (v / max);
+          const y = (h - pad) - bh;
+          ctx.fillStyle = "rgba(255,27,27,.85)";
+          ctx.fillRect(x, y, barW, bh);
+        }
+
+        ctx.fillStyle = "rgba(255,255,255,.42)";
+        ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+        ctx.fillText("Placeholder: volume real entra na V2.", 14, 18);
+      }
+
+      function hydrateUI(){
+        $("todayLabel").textContent = todayISO();
+        $("stateInfo").textContent = "v" + String(state.version);
+
+        $("routineText").value = state.routine || "";
+        renderRoutinePreview();
+
+        $("targetP").value = (state.dietTargets && state.dietTargets.P) ? state.dietTargets.P : "";
+        $("targetC").value = (state.dietTargets && state.dietTargets.C) ? state.dietTargets.C : "";
+        $("targetF").value = (state.dietTargets && state.dietTargets.F) ? state.dietTargets.F : "";
+
+        renderGallery();
+        drawMeasureChart();
+        renderGems();
+        updateDashboard();
+        renderWeeksList();
+        drawVolumeChart();
+      }
+
+      function setDefaultDates(){
+        const t = todayISO();
+        if (!$("photoDate").value) $("photoDate").value = t;
+        if (!$("measureDate").value) $("measureDate").value = t;
+        if (!$("gemDate").value) $("gemDate").value = t;
+      }
+
+      $("btnSaveRoutine").addEventListener("click", saveRoutine);
+      $("btnPreviewRoutine").addEventListener("click", previewRoutine);
+      $("btnSaveSession").addEventListener("click", saveSession);
+      $("btnSaveDietTargets").addEventListener("click", saveDietTargets);
+      $("btnCalcTdee").addEventListener("click", calcTDEE);
+      $("btnSavePhoto").addEventListener("click", savePhoto);
+      $("btnSaveMeasure").addEventListener("click", saveMeasure);
+      $("btnSaveGem").addEventListener("click", saveGem);
+      $("btnGenerateInsights").addEventListener("click", generateInsights);
+      $("btnExportBackup").addEventListener("click", exportBackup);
+      $("btnImportBackup").addEventListener("click", importBackup);
+      $("btnResetApp").addEventListener("click", resetApp);
+
+      loadState();
+      hydrateUI();
+      setDefaultDates();
+    })();
+  </script>
+</body>
+</html>
