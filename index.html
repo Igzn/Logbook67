@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOGBOOK</title>
+<style>
+:root{
+  --bg:#050509;
+  --surface:#0d0d14;
+  --primary:#ff0000;
+  --text:#f5f5f7;
+  --muted:#9aa0a6;
+  --border:rgba(255,255,255,.15);
+  --ok:#22c55e;
+  --warn:#f59e0b;
+  --bad:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+header{
+  background:var(--surface);
+  padding:1rem;
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+header h1{color:var(--primary)}
+nav{
+  display:flex;
+  gap:.5rem;
+  padding:.8rem;
+  overflow-x:auto;
+  border-bottom:1px solid var(--border);
+}
+nav button{
+  background:var(--surface);
+  color:var(--muted);
+  border:none;
+  padding:.5rem .8rem;
+  border-radius:10px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+nav button.active{
+  background:var(--primary);
+  color:#000;
+  font-weight:700;
+}
+.section{
+  display:none;
+  padding:1rem;
+}
+.section.active{display:block}
+.card{
+  background:var(--surface);
+  padding:1rem;
+  border-radius:14px;
+  margin-bottom:1rem;
+  border:1px solid var(--border);
+}
+.card h3{
+  margin-bottom:.8rem;
+  color:var(--primary);
+}
+input,select,textarea{
+  width:100%;
+  padding:.6rem;
+  margin:.3rem 0;
+  background:var(--bg);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:10px;
+}
+button.primary{
+  background:var(--primary);
+  color:#000;
+  font-weight:700;
+  border:none;
+  padding:.6rem;
+  border-radius:10px;
+  cursor:pointer;
+  margin-top:.5rem;
+}
+button.secondary{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:.6rem;
+  border-radius:10px;
+  cursor:pointer;
+  margin-top:.5rem;
+}
+.row{
+  display:flex;
+  gap:.5rem;
+  flex-wrap:wrap;
+}
+.row > *{flex:1;min-width:120px}
+.kpi{
+  background:#000;
+  padding:.8rem;
+  border-radius:12px;
+  border:1px solid var(--border);
+  margin:.4rem 0;
+}
+canvas{
+  width:100%;
+  height:250px;
+  background:#000;
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+.small{font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header><h1>LOGBOOK</h1></header>
+
+<nav>
+<button class="active" onclick="showTab('dashboard',this)">Dashboard</button>
+<button onclick="showTab('rotina',this)">Rotina</button>
+<button onclick="showTab('logbook',this)">Logbook</button>
+<button onclick="showTab('semanas',this)">Semanas</button>
+<button onclick="showTab('dieta',this)">Dieta</button>
+<button onclick="showTab('tdee',this)">TDEE</button>
+<button onclick="showTab('fisico',this)">Físico</button>
+<button onclick="showTab('medidas',this)">Medidas</button>
+<button onclick="showTab('gems',this)">GEMS</button>
+<button onclick="showTab('insights',this)">Insights</button>
+<button onclick="showTab('backup',this)">Backup</button>
+</nav>
+
+<!-- DASHBOARD -->
+
+<div id="dashboard" class="section active">
+  <div class="card">
+    <h3>Resumo</h3>
+    <div class="kpi">Sessões salvas: <span id="kpiSessions">0</span></div>
+    <div class="kpi">Sessões na semana: <span id="kpiWeekSessions">0</span></div>
+    <div class="kpi">Volume semana: <span id="kpiWeekVolume">0</span></div>
+  </div>
+  <div class="card">
+    <h3>Volume por sessão</h3>
+    <canvas id="chartVolume"></canvas>
+  </div>
+</div>
+
+<!-- ROTINA -->
+
+<div id="rotina" class="section">
+  <div class="card">
+    <h3>Rotina semanal</h3>
+    <textarea id="routineText" placeholder="Ex:
+Segunda
+Supino 2x5-9
+Agacho 3x6-8"></textarea>
+    <button class="primary" onclick="saveRoutine()">Salvar rotina</button>
+    <button class="secondary" onclick="previewRoutine()">Prévia</button>
+    <div id="routinePreview" class="small"></div>
+  </div>
+</div>
+
+<!-- LOGBOOK -->
+
+<div id="logbook" class="section">
+  <div class="card">
+    <h3>Treino de hoje</h3>
+    <textarea id="sessionNotes" placeholder="Observações"></textarea>
+    <button class="primary" onclick="saveSession()">Salvar sessão</button>
+  </div>
+</div>
+
+<!-- SEMANAS -->
+
+<div id="semanas" class="section">
+  <div class="card">
+    <h3>Semanas registradas</h3>
+    <div id="weeksList"></div>
+  </div>
+</div>
+
+<!-- DIETA -->
+
+<div id="dieta" class="section">
+  <div class="card">
+    <h3>Metas</h3>
+    <input id="targetP" type="number" placeholder="Proteína (g)">
+    <input id="targetC" type="number" placeholder="Carbo (g)">
+    <input id="targetF" type="number" placeholder="Gordura (g)">
+    <button class="primary" onclick="saveDietTargets()">Salvar metas</button>
+  </div>
+</div>
+
+<!-- TDEE -->
+
+<div id="tdee" class="section">
+  <div class="card">
+    <h3>Calcular TDEE</h3>
+    <select id="sex">
+      <option value="male">Masculino</option>
+      <option value="female">Feminino</option>
+    </select>
+    <input id="age" type="number" placeholder="Idade">
+    <input id="height" type="number" placeholder="Altura (cm)">
+    <input id="weight" type="number" placeholder="Peso (kg)">
+    <select id="activity">
+      <option value="1.2">Sedentário</option>
+      <option value="1.55">Moderado</option>
+      <option value="1.9">Muito alto</option>
+    </select>
+    <button class="primary" onclick="calcTDEE()">Calcular</button>
+    <div class="small" id="tdeeResult"></div>
+  </div>
+</div>
+
+<!-- FÍSICO -->
+
+<div id="fisico" class="section">
+  <div class="card">
+    <h3>Upload fotos</h3>
+    <input type="date" id="photoDate">
+    <input type="file" id="photoFile" accept="image/*">
+    <button class="primary" onclick="savePhoto()">Salvar</button>
+    <div id="gallery"></div>
+  </div>
+</div>
+
+<!-- MEDIDAS -->
+
+<div id="medidas" class="section">
+  <div class="card">
+    <h3>Registrar medidas</h3>
+    <input type="date" id="measureDate">
+    <input type="number" id="measureWeight" placeholder="Peso">
+    <button class="primary" onclick="saveMeasure()">Salvar</button>
+    <canvas id="measureChart"></canvas>
+  </div>
+</div>
+
+<!-- GEMS -->
+
+<div id="gems" class="section">
+  <div class="card">
+    <h3>GEM</h3>
+    <input type="date" id="gemDate">
+    <textarea id="gemText"></textarea>
+    <button class="primary" onclick="saveGem()">Salvar</button>
+    <div id="gemsList"></div>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+
+<div id="insights" class="section">
+  <div class="card">
+    <h3>Coach IA (heurístico)</h3>
+    <button class="primary" onclick="generateInsights()">Gerar insight</button>
+    <div id="insightText" class="small"></div>
+  </div>
+</div>
+
+<!-- BACKUP -->
+
+<div id="backup" class="section">
+  <div class="card">
+    <h3>Backup</h3>
+    <button class="primary" onclick="exportBackup()">Exportar JSON</button>
+    <input type="file" id="importFile" accept="application/json">
+    <button class="secondary" onclick="importBackup()">Importar</button>
+    <button class="secondary" onclick="resetApp()">Resetar</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="logbook_app";
+let state={
+  routine:"",
+  sessions:[],
+  dietTargets:{},
+  measures:[],
+  photos:[],
+  gems:[]
+};
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+}
+function loadState(){
+  const s=localStorage.getItem(STORAGE_KEY);
+  if(s) state=JSON.parse(s);
+}
+function showTab(id,btn){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  btn.classList.add("active");
+}
+
+/* ROTINA */
+function saveRoutine(){
+  state.routine=document.getElementById("routineText").value;
+  saveState();
+  alert("Rotina salva");
+}
+function previewRoutine(){
+  document.getElementById("routinePreview").innerText=state.routine;
+}
+
+/* LOGBOOK */
+function saveSession(){
+  state.sessions.push({
+    date:new Date().toISOString().slice(0,10),
+    notes:document.getElementById("sessionNotes").value
+  });
+  saveState();
+  alert("Sessão salva");
+  updateDashboard();
+}
+
+/* DASHBOARD */
+function updateDashboard(){
+  document.getElementById("kpiSessions").innerText=state.sessions.length;
+}
+
+/* DIETA */
+function saveDietTargets(){
+  state.dietTargets={
+    P:targetP.value,
+    C:targetC.value,
+    F:targetF.value
+  };
+  saveState();
+  alert("Metas salvas");
+}
+
+/* TDEE */
+function calcTDEE(){
+  let w=+weight.value,h=+height.value,a=+age.value;
+  let bmr=(sex.value==="male")?
+    (10*w+6.25*h-5*a+5):
+    (10*w+6.25*h-5*a-161);
+  let tdee=bmr*+activity.value;
+  tdeeResult.innerText="BMR: "+Math.round(bmr)+" | TDEE: "+Math.round(tdee);
+}
+
+/* FOTOS */
+function savePhoto(){
+  const file=photoFile.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    state.photos.push({date:photoDate.value,src:e.target.result});
+    saveState();
+    renderGallery();
+  };
+  reader.readAsDataURL(file);
+}
+function renderGallery(){
+  gallery.innerHTML="";
+  state.photos.forEach(p=>{
+    const img=document.createElement("img");
+    img.src=p.src;
+    img.style.width="100px";
+    gallery.appendChild(img);
+  });
+}
+
+/* MEDIDAS */
+function saveMeasure(){
+  state.measures.push({date:measureDate.value,weight:measureWeight.value});
+  saveState();
+  renderMeasureChart();
+}
+function renderMeasureChart(){
+  const ctx=document.getElementById("measureChart").getContext("2d");
+  ctx.clearRect(0,0,measureChart.width,measureChart.height);
+  ctx.fillStyle="#ff0000";
+  state.measures.forEach((m,i)=>{
+    ctx.fillRect(i*30,200-m.weight,20,m.weight);
+  });
+}
+
+/* GEMS */
+function saveGem(){
+  state.gems.push({date:gemDate.value,text:gemText.value});
+  saveState();
+  renderGems();
+}
+function renderGems(){
+  gemsList.innerHTML="";
+  state.gems.forEach(g=>{
+    const div=document.createElement("div");
+    div.innerText=g.date+" - "+g.text;
+    gemsList.appendChild(div);
+  });
+}
+function generateInsights(){
+  let msg="Continue consistente.";
+  if(state.sessions.length<3) msg="Aumente frequência semanal.";
+  insightText.innerText=msg;
+}
+
+/* BACKUP */
+function exportBackup(){
+  const blob=new Blob([JSON.stringify(state)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="logbook_backup.json";
+  a.click();
+}
+function importBackup(){
+  const file=document.getElementById("importFile").files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    state=JSON.parse(e.target.result);
+    saveState();
+    location.reload();
+  };
+  reader.readAsText(file);
+}
+function resetApp(){
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+/* INIT */
+loadState();
+updateDashboard();
+renderGallery();
+renderMeasureChart();
+renderGems();
+</script>
+
+</body>
+</html>
