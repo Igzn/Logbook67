@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#050509"/>
+<title>LOGBOOK V2</title>
+<style>
+:root{--bg:#050509;--panel:#0a0a12;--card:#0d0d14;--card2:#10101a;--red:#ff1a1a;--red2:#b30000;--text:#f5f5f7;--muted:#9a9aa3;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.06);--shadow:0 12px 30px rgba(0,0,0,.45);--r:18px;--r2:14px;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:radial-gradient(1200px 800px at 50% -20%,rgba(255,26,26,.10),transparent 55%),radial-gradient(900px 600px at 100% 0%,rgba(255,26,26,.06),transparent 55%),var(--bg);color:var(--text);overflow-x:hidden}
+header{position:sticky;top:0;z-index:50;padding:calc(14px + var(--safe-t)) 16px 14px;background:linear-gradient(180deg,rgba(10,10,18,.96),rgba(10,10,18,.72));border-bottom:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:980px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:34px;height:34px;border-radius:12px;background:radial-gradient(18px 18px at 30% 35%,rgba(255,255,255,.18),transparent 65%),radial-gradient(60px 60px at 65% 70%,rgba(255,26,26,.40),rgba(179,0,0,.20) 55%,rgba(10,10,18,1) 100%);border:1px solid rgba(255,26,26,.35);box-shadow:0 10px 25px rgba(255,26,26,.12);flex:0 0 auto}
+.brand h1{margin:0;font-size:15px;letter-spacing:.6px;font-weight:950;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand h1 b{color:var(--red)}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(13,13,20,.7);box-shadow:0 10px 20px rgba(0,0,0,.25);font-size:12px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:999px;background:var(--red);box-shadow:0 0 0 4px rgba(255,26,26,.10)}
+main{max-width:980px;margin:0 auto;padding:16px;padding-bottom:calc(96px + var(--safe-b))}
+.screen{display:none}
+.screen.active{display:block}
+.card{background:linear-gradient(180deg,rgba(13,13,20,.92),rgba(13,13,20,.78));border:1px solid var(--line2);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+h2,h3{margin:0 0 10px 0;font-size:14px;letter-spacing:.3px}
+small{color:var(--muted)}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.kpi{padding:12px;border-radius:16px;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(16,16,26,.85),rgba(10,10,18,.65));box-shadow:0 12px 22px rgba(0,0,0,.25);min-height:74px}
+.kpi .label{font-size:11px;color:var(--muted);letter-spacing:.3px;margin-bottom:6px}
+.kpi .value{font-size:18px;font-weight:950;letter-spacing:.2px;line-height:1.2}
+.kpi .sub{margin-top:6px;font-size:11px;color:rgba(255,255,255,.55)}
+.chart-wrap{border:1px solid var(--line2);border-radius:16px;background:rgba(10,10,18,.55);overflow:hidden;padding:10px}
+canvas{width:100%;height:200px;display:block;border-radius:12px;background:radial-gradient(800px 220px at 20% 0%,rgba(255,26,26,.10),transparent 55%),rgba(10,10,18,.55)}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px 10px calc(10px + var(--safe-b));background:linear-gradient(180deg,rgba(10,10,18,.20),rgba(10,10,18,.92));border-top:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.nav-inner{max-width:980px;margin:0 auto;display:flex;gap:10px}
+.tab{flex:1;border-radius:16px;padding:10px 8px;border:1px solid var(--line2);background:rgba(13,13,20,.70);color:var(--muted);font-weight:900;font-size:12px;letter-spacing:.2px;cursor:pointer;transition:transform .12s ease,background .12s ease,border-color .12s ease,color .12s ease;box-shadow:0 12px 20px rgba(0,0,0,.22)}
+.tab:active{transform:scale(.98)}
+.tab.active{color:#000;background:linear-gradient(180deg,rgba(255,26,26,1),rgba(179,0,0,1));border-color:rgba(255,26,26,.55);box-shadow:0 16px 26px rgba(255,26,26,.12)}
+.btn{border:none;border-radius:14px;padding:10px 14px;font-weight:950;cursor:pointer;transition:transform .12s ease,background .12s ease}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--red);color:#000}
+.btn-primary:hover{background:var(--red2)}
+.btn-ghost{background:transparent;color:var(--red);border:1px solid rgba(255,26,26,.35)}
+.field{width:100%;padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(10,10,18,.70);color:var(--text);outline:none;transition:border-color .12s ease,box-shadow .12s ease}
+.field:focus{border-color:rgba(255,26,26,.45);box-shadow:0 0 0 4px rgba(255,26,26,.10)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--safe-b));z-index:80;display:none;max-width:min(520px,calc(100% - 22px));padding:10px 14px;border-radius:14px;background:rgba(255,26,26,.98);color:#000;font-weight:950;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.set-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center;margin-top:8px}
+.empty{padding:14px;border-radius:16px;border:1px dashed rgba(255,255,255,.14);background:rgba(10,10,18,.40);color:rgba(255,255,255,.75);font-size:13px;line-height:1.35}
+.progress{height:8px;background:#111;border-radius:999px;overflow:hidden}
+.progress>div{height:100%;background:var(--red)}
+@media(min-width:720px){.kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr))}canvas{height:240px}.tab{font-size:13px;padding:12px 10px}header{padding:calc(16px + var(--safe-t)) 16px 16px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand"><div class="logo" aria-hidden="true"></div><h1><b>LOGBOOK</b> V2</h1></div>
+    <div class="pill"><span class="dot"></span><span>Offline</span></div>
+  </div>
+</header>
+
+<main id="app">
+  <!-- DASHBOARD -->
+  <section id="screen-dashboard" class="screen active" aria-label="Dashboard">
+    <div class="card">
+      <h2>KPIs</h2>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="label">Sessões salvas</div><div class="value" id="kpiTotalSessions">0</div><div class="sub" id="kpiTotalSessionsSub">—</div></div>
+        <div class="kpi"><div class="label">Sessões na semana</div><div class="value" id="kpiWeekSessions">0</div><div class="sub" id="kpiWeekSessionsSub">—</div></div>
+        <div class="kpi"><div class="label">Volume na semana</div><div class="value" id="kpiWeekVolume">0</div><div class="sub" id="kpiWeekVolumeSub">kg·reps</div></div>
+        <div class="kpi"><div class="label">Aderência hoje</div><div class="value" id="kpiDietAdherence">—</div><div class="sub" id="kpiDietAdherenceSub">kcal / P</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Volume (últimas sessões)</h2>
+      <small>Canvas offline, sem bibliotecas.</small>
+      <div class="chart-wrap" style="margin-top:12px;"><canvas id="volumeChart" width="400" height="200"></canvas></div>
+    </div>
+  </section>
+
+  <!-- LOGBOOK -->
+  <section id="screen-logbook" class="screen" aria-label="Logbook">
+    <div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div style="min-width:0;">
+          <h2>Treino de hoje</h2>
+          <small id="todayLabel">—</small>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-ghost" id="btnAddExercise" type="button">+ Exercício</button>
+          <button class="btn btn-primary" id="btnSaveSession" type="button">Salvar sessão</button>
+        </div>
+      </div>
+      <div id="todayExercises" style="margin-top:14px;">
+        <div class="empty">Salve sua rotina na aba <b>Rotina</b> para carregar automaticamente o treino do dia.</div>
+      </div>
+      <textarea id="sessionNotes" class="field" rows="3" style="margin-top:12px;" placeholder="Observações do treino (opcional)"></textarea>
+    </div>
+  </section>
+
+  <!-- ROTINA -->
+  <section id="screen-rotina" class="screen" aria-label="Rotina">
+    <div class="card">
+      <h2>Rotina</h2>
+      <small>Cole sua rotina por dias. Ex: “Supino reto 2x5-9, 1x8-10”.</small>
+      <textarea id="routineTextarea" class="field" rows="12" style="margin-top:12px;" placeholder="Segunda
+Supino reto 2x5-9, 1x8-10
+Agachamento 3x6-8
+
+Terça
+Remada 3x8-12"></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn btn-primary" id="btnSaveRoutine" type="button">Salvar rotina</button>
+        <button class="btn btn-ghost" id="btnClearRoutine" type="button">Limpar</button>
+      </div>
+      <pre id="routinePreview" style="margin-top:12px;white-space:pre-wrap;background:rgba(10,10,18,.55);border:1px solid rgba(255,255,255,.06);padding:12px;border-radius:14px;max-height:260px;overflow:auto;"></pre>
+    </div>
+  </section>
+
+  <!-- DIETA -->
+  <section id="screen-dieta" class="screen" aria-label="Dieta">
+    <div class="card">
+      <h2>Dieta</h2>
+      <small>Manual (kcal/P/C/F) por refeição + metas do dia + total.</small>
+      <div class="row" style="margin-top:12px;">
+        <div style="flex:1;min-width:180px;">
+          <small>Data</small>
+          <input id="dietDate" class="field" type="date">
+        </div>
+        <div style="flex:1;min-width:180px;">
+          <small>Refeição</small>
+          <select id="dietMeal" class="field">
+            <option value="cafe">Café</option><option value="almoco">Almoço</option><option value="lanche">Lanche</option><option value="jantar">Jantar</option><option value="ceia">Ceia</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px;">
+        <h3>Metas do dia</h3>
+        <div class="row">
+          <input id="tKcal" class="field" type="number" placeholder="kcal" style="flex:1;min-width:130px;">
+          <input id="tP" class="field" type="number" placeholder="P (g)" style="flex:1;min-width:130px;">
+          <input id="tC" class="field" type="number" placeholder="C (g)" style="flex:1;min-width:130px;">
+          <input id="tF" class="field" type="number" placeholder="F (g)" style="flex:1;min-width:130px;">
+        </div>
+        <button class="btn btn-primary" id="btnSaveTargets" type="button" style="margin-top:10px;">Salvar metas</button>
+        <div id="dietProgress" style="margin-top:12px;"></div>
+      </div>
+
+      <div class="card">
+        <h3>Adicionar item</h3>
+        <input id="foodName" class="field" placeholder="Nome (ex: arroz, frango...)">
+        <div class="row">
+          <input id="fKcal" class="field" type="number" placeholder="kcal (opcional)" style="flex:1;min-width:120px;">
+          <input id="fP" class="field" type="number" placeholder="P" style="flex:1;min-width:120px;">
+          <input id="fC" class="field" type="number" placeholder="C" style="flex:1;min-width:120px;">
+          <input id="fF" class="field" type="number" placeholder="F" style="flex:1;min-width:120px;">
+        </div>
+        <button class="btn btn-primary" id="btnAddFood" type="button" style="margin-top:10px;">Adicionar</button>
+      </div>
+
+      <div class="card">
+        <h3>Total do dia</h3>
+        <div id="dietTotals"></div>
+      </div>
+
+      <div class="card">
+        <h3>Refeições</h3>
+        <div id="dietMealsList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIS -->
+  <section id="screen-mais" class="screen" aria-label="Mais">
+    <div class="card">
+      <h2>Mais</h2>
+      <small>Backup JSON offline (exportar/importar) e limpar dados.</small>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn btn-ghost" id="btnExportJSON" type="button">Exportar JSON</button>
+        <button class="btn btn-ghost" id="btnImportJSON" type="button">Importar JSON</button>
+        <button class="btn btn-ghost" id="btnClearData" type="button">Limpar dados</button>
+      </div>
+      <input id="importFile" type="file" accept="application/json" style="display:none">
+      <textarea id="rawState" class="field" rows="12" style="margin-top:12px;" placeholder="Estado JSON..."></textarea>
+    </div>
+  </section>
+</main>
+
+<nav class="nav" aria-label="Navegação">
+  <div class="nav-inner">
+    <button class="tab active" id="tab-dashboard" type="button" data-target="dashboard">Dashboard</button>
+    <button class="tab" id="tab-logbook" type="button" data-target="logbook">Logbook</button>
+    <button class="tab" id="tab-rotina" type="button" data-target="rotina">Rotina</button>
+    <button class="tab" id="tab-dieta" type="button" data-target="dieta">Dieta</button>
+    <button class="tab" id="tab-mais" type="button" data-target="mais">Mais</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(()=>{"use strict";
+const STORAGE_KEY="LOGBOOK_V2",OLD_KEY="LOGBOOK_V2_PLACEHOLDER";
+const WEEK_KEYS=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const MEAL_KEYS=["cafe","almoco","lanche","jantar","ceia"];
+const MEAL_LABEL={cafe:"Café",almoco:"Almoço",lanche:"Lanche",jantar:"Jantar",ceia:"Ceia"};
+let toastTimer=null;
+let state={version:2,routineText:"",routineParsed:{},sessions:[],days:{},measures:[],photos:[],gems:[]};
+
+const $=id=>document.getElementById(id);
+const qsa=(sel,root=document)=>Array.from(root.querySelectorAll(sel));
+const qs=(sel,root=document)=>root.querySelector(sel);
+
+function escapeHtml(str){return (str||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function showToast(msg){const el=$("toast");if(!el)return;el.textContent=msg;el.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.style.display="none"},2200)}
+function deepClone(o){try{return JSON.parse(JSON.stringify(o))}catch{return {}}}
+
+function migrateState(old){
+const base=deepClone({version:2,routineText:"",routineParsed:{},sessions:[],days:{},measures:[],photos:[],gems:[]});
+if(!old||typeof old!=="object")return base;
+const m=deepClone(base);
+m.routineText=typeof old.routineText==="string"?old.routineText:typeof old.routine==="string"?old.routine:typeof old.routineRaw==="string"?old.routineRaw:m.routineText;
+m.routineParsed=(old.routineParsed&&typeof old.routineParsed==="object")?old.routineParsed:(old.routineJSON&&typeof old.routineJSON==="object")?old.routineJSON:m.routineParsed;
+m.sessions=Array.isArray(old.sessions)?old.sessions:Array.isArray(old.logbook)?old.logbook:m.sessions;
+m.days=(old.days&&typeof old.days==="object")?old.days:(old.dietDays&&typeof old.dietDays==="object")?old.dietDays:(old.nutritionDays&&typeof old.nutritionDays==="object")?old.nutritionDays:(old.dietTargets&&typeof old.dietTargets==="object")?old.dietTargets:m.days;
+m.measures=Array.isArray(old.measures)?old.measures:m.measures;
+m.photos=Array.isArray(old.photos)?old.photos:m.photos;
+m.gems=Array.isArray(old.gems)?old.gems:m.gems;
+if(typeof m.routineText!=="string")m.routineText="";
+if(!m.routineParsed||typeof m.routineParsed!=="object")m.routineParsed={};
+if(!Array.isArray(m.sessions))m.sessions=[];
+if(!m.days||typeof m.days!=="object")m.days={};
+m.version=2;return m;
+}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch{showToast("Erro ao salvar (storage cheio?)")}}
+function loadState(){
+try{
+const cur=localStorage.getItem(STORAGE_KEY);
+if(cur){state=migrateState(JSON.parse(cur));saveState();return}
+const old=localStorage.getItem(OLD_KEY);
+if(old){state=migrateState(JSON.parse(old));saveState();showToast("Dados migrados para LOGBOOK_V2");return}
+state=migrateState(null);saveState();
+}catch{state=migrateState(null);saveState();showToast("Estado resetado por erro")}
+}
+
+function isoDay(d=new Date()){return new Date(d).toISOString().slice(0,10)}
+function todayWeekKey(){return WEEK_KEYS[new Date().getDay()]}
+function weekId(date){
+const d=new Date(date),t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);
+const ys=new Date(Date.UTC(t.getUTCFullYear(),0,1));
+const wn=Math.ceil((((t-ys)/86400000)+1)/7);
+return `${t.getUTCFullYear()}-W${wn}`;
+}
+function unaccent(s){return (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+function parseRoutineV2(text){
+const lines=(text||"").split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+const days=[
+{key:"Segunda",re:/^segunda\b/i},
+{key:"Terça",re:/^(terça|terca)\b/i},
+{key:"Quarta",re:/^quarta\b/i},
+{key:"Quinta",re:/^quinta\b/i},
+{key:"Sexta",re:/^sexta\b/i},
+{key:"Sábado",re:/^(sábado|sabado)\b/i},
+{key:"Domingo",re:/^domingo\b/i},
+];
+const out={};let cur=null;
+for(const raw of lines){
+const d=days.find(x=>x.re.test(raw));
+if(d){cur=d.key;if(!out[cur])out[cur]=[];continue}
+if(!cur)continue;
+const blockRe=/(\d+)\s*x\s*(\d+)\s*-\s*(\d+)/ig;
+const first=blockRe.exec(raw);if(!first)continue;
+const name=raw.slice(0,first.index).trim().replace(/\s+/g," ");
+if(!name)continue;
+const blocks=[];blockRe.lastIndex=0;let m;
+while((m=blockRe.exec(raw))!==null){
+const nSets=parseInt(m[1],10),repMin=parseInt(m[2],10),repMax=parseInt(m[3],10);
+if(nSets>0&&repMin>0&&repMax>=repMin)blocks.push({nSets,repMin,repMax});
+}
+if(!blocks.length)continue;
+out[cur].push({name,blocks});
+}
+return out;
+}
+
+/* NAV */
+function nav(target){
+const tid=String(target||"").trim();
+qsa(".screen").forEach(s=>s.classList.remove("active"));
+const screen=$("screen-"+tid);if(screen)screen.classList.add("active");
+qsa(".tab").forEach(t=>t.classList.remove("active"));
+const tab=$("tab-"+tid);if(tab)tab.classList.add("active");
+if(tid==="dashboard"){updateDashboard();drawChart(state.sessions)}
+else if(tid==="logbook"){renderLogbook()}
+else if(tid==="rotina"){renderRoutine()}
+else if(tid==="dieta"){renderDiet()}
+else if(tid==="mais"){renderMore()}
+}
+
+/* DASHBOARD */
+function sessionVolume(session){
+let v=0;if(!session||!session.exercises)return 0;
+session.exercises.forEach(ex=>(ex.sets||[]).forEach(s=>{const kg=+s.kg,reps=+s.reps;if(kg>0&&reps>0)v+=kg*reps}));
+return Math.round(v);
+}
+function dietTotals(dayObj){
+const t={kcal:0,p:0,c:0,f:0};
+MEAL_KEYS.forEach(mk=>(dayObj.meals[mk]||[]).forEach(it=>{t.kcal+=(+it.kcal||0);t.p+=(+it.p||0);t.c+=(+it.c||0);t.f+=(+it.f||0)}));
+t.kcal=Math.round(t.kcal);t.p=+t.p.toFixed(1);t.c=+t.c.toFixed(1);t.f=+t.f.toFixed(1);return t;
+}
+function updateDashboard(){
+const total=state.sessions.length;
+const nowW=weekId(new Date());
+let weekSessions=0,weekVolume=0;
+for(const s of state.sessions){if(weekId(new Date(s.date))===nowW){weekSessions++;weekVolume+=sessionVolume(s)}}
+$("kpiTotalSessions").textContent=String(total);
+$("kpiWeekSessions").textContent=String(weekSessions);
+$("kpiWeekVolume").textContent=String(Math.round(weekVolume));
+$("kpiTotalSessionsSub").textContent=total?new Date(state.sessions[total-1].date).toLocaleDateString("pt-BR"):"—";
+$("kpiWeekSessionsSub").textContent=`Semana ${nowW}`;
+const today=isoDay(new Date());
+let adhText="—",adhSub="kcal / P";
+if(state.days&&state.days[today]){
+const d=ensureDietDay(today);
+const totals=dietTotals(d);
+const tgt=d.targets||{kcal:0,p:0,c:0,f:0};
+const kcalPct=tgt.kcal>0?Math.round((totals.kcal/tgt.kcal)*100):null;
+const pPct=tgt.p>0?Math.round((totals.p/tgt.p)*100):null;
+if(kcalPct!==null||pPct!==null){
+adhText=`${kcalPct!==null?Math.min(999,kcalPct):"—"}%`;
+adhSub=`kcal ${kcalPct!==null?Math.min(999,kcalPct):"—"}% • P ${pPct!==null?Math.min(999,pPct):"—"}%`;
+}else if(totals.kcal>0){adhText=`${totals.kcal} kcal`;adhSub="sem meta";}
+}
+$("kpiDietAdherence").textContent=adhText;
+$("kpiDietAdherenceSub").textContent=adhSub;
+}
+function drawChart(sessions){
+const canvas=$("volumeChart");if(!canvas)return;
+const ctx=canvas.getContext("2d");
+const cssW=canvas.clientWidth||400,cssH=canvas.clientHeight||200;
+const dpr=window.devicePixelRatio||1;
+canvas.width=Math.round(cssW*dpr);canvas.height=Math.round(cssH*dpr);
+ctx.setTransform(dpr,0,0,dpr,0,0);
+ctx.clearRect(0,0,cssW,cssH);
+const last=(sessions||[]).slice(-7);
+const vols=last.map(s=>sessionVolume(s));
+const max=Math.max(...vols,1);
+const padL=10,padR=10,padT=12,padB=26;
+const innerW=cssW-padL-padR,innerH=cssH-padT-padB;
+ctx.globalAlpha=.16;ctx.fillStyle="#fff";
+for(let i=0;i<=3;i++){const y=padT+(innerH/3)*i;ctx.fillRect(padL,y,innerW,1)}
+ctx.globalAlpha=1;
+const n=Math.max(vols.length,1),gap=10,barW=Math.max(14,Math.floor((innerW-gap*(n-1))/n));
+vols.forEach((v,i)=>{const x=padL+i*(barW+gap);const h=Math.round((v/max)*innerH);const y=padT+(innerH-h);
+ctx.fillStyle="#ff1a1a";ctx.fillRect(x,y,barW,h);
+ctx.fillStyle="rgba(255,255,255,.60)";ctx.font="11px -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif";
+ctx.fillText(String(v),x,cssH-10);
+});
+}
+
+/* LOGBOOK */
+function buildSetRow(){
+const row=document.createElement("div");row.className="set-row";
+row.innerHTML=`<input class="field" type="number" step="0.5" placeholder="kg" style="margin:0">
+<input class="field" type="number" step="1" placeholder="reps" style="margin:0">
+<input class="field" type="number" step="1" placeholder="RIR" style="margin:0">
+<button class="btn btn-ghost" type="button" style="padding:10px 12px">X</button>`;
+row.querySelector("button").addEventListener("click",()=>row.remove());
+return row;
+}
+function buildExerciseCard(name,blocks){
+const wrap=document.createElement("div");wrap.className="card";wrap.dataset.exercise="1";
+wrap.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+<div><div class="ex-name" style="font-weight:950;letter-spacing:.2px;">${escapeHtml(name)}</div><small>Edite livremente.</small></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+<button class="btn btn-ghost" type="button" data-act="addset">+ Set</button>
+<button class="btn btn-ghost" type="button" data-act="rmex">Remover</button>
+</div></div>
+<div class="sets-host" style="margin-top:12px;"></div>`;
+const setsHost=wrap.querySelector(".sets-host");
+const totalSets=Array.isArray(blocks)?blocks.reduce((a,b)=>a+((b&&b.nSets)||0),0):0;
+const n=totalSets>0?totalSets:3;
+for(let i=0;i<n;i++)setsHost.appendChild(buildSetRow());
+wrap.querySelector('[data-act="addset"]').addEventListener("click",()=>setsHost.appendChild(buildSetRow()));
+wrap.querySelector('[data-act="rmex"]').addEventListener("click",()=>{wrap.remove();showToast("Exercício removido (salve para gravar).")});
+return wrap;
+}
+function renderLogbook(){
+const wk=todayWeekKey();$("todayLabel").textContent=`${wk} • ${isoDay(new Date())}`;
+const host=$("todayExercises");host.innerHTML="";
+const rp=state.routineParsed||{};
+const exs=rp[wk]||rp[unaccent(wk)]||[];
+if(!exs.length){host.innerHTML=`<div class="empty">Nenhuma rotina para <b>${wk}</b>. Vá em <b>Rotina</b> e salve.</div>`;return}
+exs.forEach(ex=>host.appendChild(buildExerciseCard(ex.name,ex.blocks)));
+}
+function saveSession(){
+const wk=todayWeekKey();
+const cards=qsa("#todayExercises .card").filter(c=>c.dataset.exercise==="1");
+if(!cards.length){showToast("Nenhum exercício para salvar.");return}
+const exercises=[];
+for(const card of cards){
+const nameEl=card.querySelector(".ex-name");const name=nameEl?nameEl.textContent.trim():"Exercício";
+const sets=[];
+qsa(".set-row",card).forEach(row=>{
+const ins=qsa("input",row);
+const kg=parseFloat(ins[0]?.value||"");const reps=parseInt(ins[1]?.value||"",10);const rir=parseInt(ins[2]?.value||"",10);
+sets.push({kg:Number.isFinite(kg)?kg:0,reps:Number.isFinite(reps)?reps:0,rir:Number.isFinite(rir)?rir:null});
+});
+exercises.push({name,sets});
+}
+const notes=($("sessionNotes").value||"").trim();
+state.sessions.push({date:new Date().toISOString(),weekdayKey:wk,exercises,notes});
+saveState();$("sessionNotes").value="";showToast("Sessão salva.");
+}
+
+/* ROTINA */
+function renderRoutine(){
+$("routineTextarea").value=state.routineText||"";
+$("routinePreview").textContent=JSON.stringify(state.routineParsed||{},null,2);
+}
+function saveRoutine(){
+const text=$("routineTextarea").value||"";
+const parsed=parseRoutineV2(text);
+if(!Object.keys(parsed).length){showToast("Não consegui parsear. Use NxA-B (ex: Supino 3x8-10).");return}
+state.routineText=text;state.routineParsed=parsed;saveState();
+$("routinePreview").textContent=JSON.stringify(state.routineParsed,null,2);
+showToast("Rotina salva ✅");
+}
+
+/* DIETA (manual funcional) */
+function ensureDietDay(dateStr){
+if(!state.days||typeof state.days!=="object")state.days={};
+if(!state.days[dateStr]){
+state.days[dateStr]={targets:{kcal:0,p:0,c:0,f:0},meals:{cafe:[],almoco:[],lanche:[],jantar:[],ceia:[]}};
+}else{
+const d=state.days[dateStr];
+if(!d.targets)d.targets={kcal:0,p:0,c:0,f:0};
+if(!d.meals)d.meals={cafe:[],almoco:[],lanche:[],jantar:[],ceia:[]};
+MEAL_KEYS.forEach(k=>{if(!Array.isArray(d.meals[k]))d.meals[k]=[]});
+}
+return state.days[dateStr];
+}
+function renderProgressBars(totals,tgt){
+function bar(label,cur,goal){
+if(!(goal>0))return `<div style="margin:8px 0;"><small>${label}: <b>${cur}</b> (sem meta)</small></div>`;
+const pct=Math.min(100,Math.round((cur/goal)*100));
+const left=Math.max(0,Math.round(goal-cur));
+return `<div style="margin:8px 0;">
+<small>${label}: <b>${cur}</b> / ${goal} • ${pct}% • faltam ${left}</small>
+<div class="progress"><div style="width:${pct}%;"></div></div></div>`;
+}
+return `${bar("kcal",totals.kcal,tgt.kcal)}${bar("Proteína (g)",totals.p,tgt.p)}${bar("Carbo (g)",totals.c,tgt.c)}${bar("Gordura (g)",totals.f,tgt.f)}`;
+}
+function renderDiet(){
+const day=$("dietDate").value||isoDay(new Date());
+$("dietDate").value=day;
+const d=ensureDietDay(day);
+$("tKcal").value=d.targets.kcal||0;
+$("tP").value=d.targets.p||0;
+$("tC").value=d.targets.c||0;
+$("tF").value=d.targets.f||0;
+const totals=dietTotals(d);
+$("dietTotals").innerHTML=`<b>kcal:</b> ${totals.kcal} • <b>P:</b> ${totals.p}g • <b>C:</b> ${totals.c}g • <b>F:</b> ${totals.f}g`;
+$("dietProgress").innerHTML=renderProgressBars(totals,d.targets||{kcal:0,p:0,c:0,f:0});
+renderDietMealsList(day);
+updateDashboard();
+}
+function renderDietMealsList(day){
+const d=ensureDietDay(day);
+let html="";
+MEAL_KEYS.forEach(mk=>{
+const items=d.meals[mk]||[];
+html+=`<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;margin-top:10px;">
+<div style="font-weight:950;margin-bottom:6px;">${MEAL_LABEL[mk]}</div>`;
+if(!items.length){html+=`<small>Sem itens.</small>`}
+else{
+items.forEach(it=>{
+html+=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-top:8px;">
+<div><div><b>${escapeHtml(it.name)}</b></div><small>kcal ${Math.round(it.kcal)} • P ${it.p} • C ${it.c} • F ${it.f}</small></div>
+<button class="btn btn-ghost" type="button" data-rm="1" data-day="${day}" data-meal="${mk}" data-id="${it.id}">X</button>
+</div>`;
+});
+}
+html+=`</div>`;
+});
+$("dietMealsList").innerHTML=html;
+qsa('button[data-rm="1"]',$("dietMealsList")).forEach(btn=>{
+btn.addEventListener("click",()=>{
+const day=btn.getAttribute("data-day");
+const meal=btn.getAttribute("data-meal");
+const id=btn.getAttribute("data-id");
+removeDietItem(day,meal,id);
+});
+});
+}
+function saveDietTargets(){
+const day=$("dietDate").value||isoDay(new Date());
+const d=ensureDietDay(day);
+d.targets.kcal=Math.max(0,Math.round(parseFloat($("tKcal").value)||0));
+d.targets.p=Math.max(0,Math.round(parseFloat($("tP").value)||0));
+d.targets.c=Math.max(0,Math.round(parseFloat($("tC").value)||0));
+d.targets.f=Math.max(0,Math.round(parseFloat($("tF").value)||0));
+saveState();renderDiet();showToast("Metas salvas.");
+}
+function addFoodManual(){
+const day=$("dietDate").value||isoDay(new Date());
+const meal=$("dietMeal").value||"cafe";
+const d=ensureDietDay(day);
+const name=($("foodName").value||"").trim();
+const kcalIn=Math.round(parseFloat($("fKcal").value)||0);
+const p=parseFloat($("fP").value)||0;
+const c=parseFloat($("fC").value)||0;
+const f=parseFloat($("fF").value)||0;
+if(!name){showToast("Informe o nome.");return}
+if(!(kcalIn>0||p>0||c>0||f>0)){showToast("Informe kcal ou macros.");return}
+const kcal=kcalIn>0?kcalIn:Math.round(p*4+c*4+f*9);
+d.meals[meal].push({id:"D"+Date.now()+Math.random().toString(16).slice(2),name,kcal,p:+p.toFixed(1),c:+c.toFixed(1),f:+f.toFixed(1)});
+$("foodName").value="";$("fKcal").value="";$("fP").value="";$("fC").value="";$("fF").value="";
+saveState();renderDiet();showToast("Item adicionado.");
+}
+function removeDietItem(day,meal,id){
+const d=ensureDietDay(day);
+const arr=d.meals[meal]||[];
+const idx=arr.findIndex(x=>x.id===id);
+if(idx>=0){arr.splice(idx,1);saveState();renderDiet();showToast("Removido.");}
+}
+
+/* MAIS (export/import) */
+function renderMore(){
+$("rawState").value=JSON.stringify(state,null,2);
+}
+function exportJSON(){
+const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="logbook_v2_backup.json";a.click();
+showToast("Exportado.");
+}
+function importJSON(file){
+const fr=new FileReader();
+fr.onload=()=>{try{state=migrateState(JSON.parse(fr.result));saveState();showToast("Importado ✅");renderAll()}catch{showToast("JSON inválido.")}};
+fr.readAsText(file);
+}
+function clearData(){
+localStorage.removeItem(STORAGE_KEY);
+state=migrateState(null);saveState();
+showToast("Dados limpos.");
+renderAll();nav("dashboard");
+}
+
+/* INIT + BINDINGS */
+function renderAll(){
+updateDashboard();drawChart(state.sessions);
+renderRoutine();renderDiet();renderMore();
+}
+function bind(){
+qsa(".tab").forEach(btn=>btn.addEventListener("click",()=>nav(btn.getAttribute("data-target"))));
+$("btnSaveRoutine").addEventListener("click",saveRoutine);
+$("btnClearRoutine").addEventListener("click",()=>{state.routineText="";state.routineParsed={};saveState();renderRoutine();showToast("Rotina limpa.")});
+$("btnSaveSession").addEventListener("click",()=>{saveSession();updateDashboard();drawChart(state.sessions);nav("dashboard")});
+$("btnAddExercise").addEventListener("click",()=>{ // modal inline sem alert/prompt
+openInlinePrompt("Nome do exercício extra:").then(name=>{
+if(!name)return;
+const host=$("todayExercises");host.appendChild(buildExerciseCard(name,[{nSets:3,repMin:0,repMax:0}]));
+showToast("Exercício extra adicionado.");
+});
+});
+$("dietDate").addEventListener("change",renderDiet);
+$("btnSaveTargets").addEventListener("click",saveDietTargets);
+$("btnAddFood").addEventListener("click",addFoodManual);
+$("btnExportJSON").addEventListener("click",()=>{renderMore();exportJSON()});
+$("btnImportJSON").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(f)importJSON(f);e.target.value=""});
+$("btnClearData").addEventListener("click",clearData);
+}
+
+/* Inline prompt (sem alert/prompt) */
+function openInlinePrompt(label){
+return new Promise(resolve=>{
+const existing=qs("[data-inlineprompt='1']");if(existing)existing.remove();
+const overlay=document.createElement("div");
+overlay.dataset.inlineprompt="1";
+overlay.style.position="fixed";overlay.style.inset="0";overlay.style.background="rgba(0,0,0,.55)";
+overlay.style.zIndex="999";overlay.style.display="flex";overlay.style.alignItems="center";
+overlay.style.justifyContent="center";overlay.style.padding="18px";
+const box=document.createElement("div");
+box.style.width="min(520px,100%)";
+box.style.background="rgba(13,13,20,.98)";
+box.style.border="1px solid rgba(255,255,255,.10)";
+box.style.borderRadius="18px";
+box.style.boxShadow="0 18px 40px rgba(0,0,0,.55)";
+box.style.padding="14px";
+box.innerHTML=`<div style="font-weight:950;color:#fff;margin-bottom:6px;">${escapeHtml(label)}</div>
+<input class="field" id="inlinePromptInput" placeholder="Ex: Rosca direta" style="margin-top:10px;">
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+<button class="btn btn-ghost" id="inlinePromptCancel" type="button">Cancelar</button>
+<button class="btn btn-primary" id="inlinePromptOk" type="button">OK</button>
+</div>`;
+overlay.appendChild(box);document.body.appendChild(overlay);
+const input=$("inlinePromptInput");if(input)input.focus();
+const cleanup=val=>{overlay.remove();resolve(val)};
+$("inlinePromptCancel").onclick=()=>cleanup("");
+$("inlinePromptOk").onclick=()=>cleanup((input&&input.value||"").trim());
+overlay.addEventListener("click",e=>{if(e.target===overlay)cleanup("")});
+});
+}
+
+window.addEventListener("DOMContentLoaded",()=>{
+loadState();
+$("dietDate").value=isoDay(new Date());
+bind();
+renderAll();
+nav("dashboard");
+});
+})();</script>
+</body>
+</html>
