@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#050509" />
+  <title>LOGBOOK V2</title>
+
+  <style>
+    :root{
+      --bg:#050509;
+      --panel:#0a0a12;
+      --card:#0d0d14;
+      --card2:#10101a;
+      --red:#ff1a1a;
+      --red2:#b30000;
+      --text:#f5f5f7;
+      --muted:#9a9aa3;
+      --line:rgba(255,255,255,.08);
+      --line2:rgba(255,255,255,.06);
+      --shadow: 0 12px 30px rgba(0,0,0,.45);
+      --radius:18px;
+      --radius2:14px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+    }
+
+    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+      background: radial-gradient(1200px 800px at 50% -20%, rgba(255,26,26,.10), transparent 55%),
+                  radial-gradient(900px 600px at 100% 0%, rgba(255,26,26,.06), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+
+    /* Top bar */
+    header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      padding: calc(14px + var(--safe-top)) 16px 14px 16px;
+      background: linear-gradient(180deg, rgba(10,10,18,.96), rgba(10,10,18,.72));
+      border-bottom:1px solid var(--line);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      max-width:980px;
+      margin:0 auto;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .logo{
+      width:34px; height:34px;
+      border-radius:12px;
+      background:
+        radial-gradient(18px 18px at 30% 35%, rgba(255,255,255,.18), transparent 65%),
+        radial-gradient(60px 60px at 65% 70%, rgba(255,26,26,.40), rgba(179,0,0,.20) 55%, rgba(10,10,18,1) 100%);
+      border:1px solid rgba(255,26,26,.35);
+      box-shadow: 0 10px 25px rgba(255,26,26,.12);
+      flex:0 0 auto;
+    }
+    .brand h1{
+      margin:0;
+      font-size:15px;
+      letter-spacing:.6px;
+      font-weight:950;
+      color:var(--text);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand h1 b{ color:var(--red); }
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex:0 0 auto;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(13,13,20,.7);
+      box-shadow: 0 10px 20px rgba(0,0,0,.25);
+      font-size:12px;
+      color:var(--muted);
+    }
+    .dot{
+      width:8px; height:8px;
+      border-radius:999px;
+      background: var(--red);
+      box-shadow: 0 0 0 4px rgba(255,26,26,.10);
+    }
+
+    /* Main */
+    main{
+      max-width:980px;
+      margin:0 auto;
+      padding:16px;
+      padding-bottom: calc(96px + var(--safe-bottom));
+    }
+
+    /* Tabs */
+    .screen{ display:none; }
+    .screen.active{ display:block; }
+
+    /* Cards */
+    .card{
+      background: linear-gradient(180deg, rgba(13,13,20,.92), rgba(13,13,20,.78));
+      border:1px solid var(--line2);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+      margin-bottom:14px;
+    }
+    .card h2, .card h3{
+      margin:0 0 10px 0;
+      font-size:14px;
+      letter-spacing:.3px;
+    }
+    .muted{ color:var(--muted); }
+    .row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .kpi-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .kpi{
+      padding:12px;
+      border-radius:16px;
+      border:1px solid var(--line2);
+      background: linear-gradient(180deg, rgba(16,16,26,.85), rgba(10,10,18,.65));
+      box-shadow: 0 12px 22px rgba(0,0,0,.25);
+      min-height:74px;
+    }
+    .kpi .label{
+      font-size:11px;
+      color:var(--muted);
+      letter-spacing:.3px;
+      margin-bottom:6px;
+    }
+    .kpi .value{
+      font-size:18px;
+      font-weight:950;
+      letter-spacing:.2px;
+      color:var(--text);
+      line-height:1.2;
+    }
+    .kpi .sub{
+      margin-top:6px;
+      font-size:11px;
+      color:rgba(255,255,255,.55);
+    }
+
+    /* Chart */
+    .chart-wrap{
+      border:1px solid var(--line2);
+      border-radius:16px;
+      background: rgba(10,10,18,.55);
+      overflow:hidden;
+      padding:10px;
+    }
+    canvas{
+      width:100%;
+      height:200px;
+      display:block;
+      border-radius:12px;
+      background: radial-gradient(800px 220px at 20% 0%, rgba(255,26,26,.10), transparent 55%),
+                  rgba(10,10,18,.55);
+    }
+
+    /* Logbook list area (JS will inject) */
+    .logbook-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .logbook-title{
+      min-width:0;
+    }
+    .logbook-title h2{ margin:0; }
+    .logbook-title small{
+      display:block;
+      margin-top:6px;
+      color:var(--muted);
+    }
+    .inject-area{
+      margin-top:14px;
+    }
+    .empty-state{
+      padding:14px;
+      border-radius:16px;
+      border:1px dashed rgba(255,255,255,.14);
+      background: rgba(10,10,18,.40);
+      color:rgba(255,255,255,.70);
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    /* Bottom nav */
+    .nav{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:60;
+      padding:10px 10px calc(10px + var(--safe-bottom)) 10px;
+      background: linear-gradient(180deg, rgba(10,10,18,.20), rgba(10,10,18,.92));
+      border-top:1px solid var(--line);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .nav-inner{
+      max-width:980px;
+      margin:0 auto;
+      display:flex;
+      gap:10px;
+    }
+    .tab{
+      flex:1;
+      border-radius:16px;
+      padding:10px 8px;
+      border:1px solid var(--line2);
+      background: rgba(13,13,20,.70);
+      color:var(--muted);
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.2px;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
+      box-shadow: 0 12px 20px rgba(0,0,0,.22);
+    }
+    .tab:active{ transform: scale(.98); }
+    .tab.active{
+      color:#000;
+      background: linear-gradient(180deg, rgba(255,26,26,1), rgba(179,0,0,1));
+      border-color: rgba(255,26,26,.55);
+      box-shadow: 0 16px 26px rgba(255,26,26,.12);
+    }
+
+    /* Buttons, inputs (for later parts; included now for consistent UI) */
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:10px 14px;
+      font-weight:950;
+      cursor:pointer;
+      transition: filter .12s ease, transform .12s ease, background .12s ease;
+      user-select:none;
+    }
+    .btn:active{ transform:scale(.98); }
+    .btn-primary{
+      background: var(--red);
+      color:#000;
+    }
+    .btn-primary:hover{ background: var(--red2); }
+    .btn-ghost{
+      background: transparent;
+      color: var(--red);
+      border:1px solid rgba(255,26,26,.35);
+    }
+    .field{
+      width:100%;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(10,10,18,.70);
+      color:var(--text);
+      outline:none;
+      transition: border-color .12s ease, box-shadow .12s ease;
+    }
+    .field:focus{
+      border-color: rgba(255,26,26,.45);
+      box-shadow: 0 0 0 4px rgba(255,26,26,.10);
+    }
+
+    /* Toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom: calc(84px + var(--safe-bottom));
+      z-index:80;
+      display:none;
+      max-width:min(520px, calc(100% - 22px));
+      padding:10px 14px;
+      border-radius:14px;
+      background: rgba(255,26,26,.98);
+      color:#000;
+      font-weight:950;
+      box-shadow: 0 18px 40px rgba(0,0,0,.45);
+    }
+
+    /* Responsive */
+    @media (min-width:720px){
+      .kpi-grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      canvas{ height:240px; }
+      .tab{ font-size:13px; padding:12px 10px; }
+      header{ padding: calc(16px + var(--safe-top)) 16px 16px 16px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1><b>LOGBOOK</b> V2</h1>
+      </div>
+      <div class="top-actions">
+        <div class="pill" title="Offline">
+          <span class="dot"></span>
+          <span>Offline</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- DASHBOARD -->
+    <section id="screen-dashboard" class="screen active" aria-label="Dashboard">
+      <div class="card">
+        <h2>KPIs</h2>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="label">Sessões salvas</div>
+            <div class="value" id="kpiTotalSessions">0</div>
+            <div class="sub" id="kpiTotalSessionsSub">—</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Sessões na semana</div>
+            <div class="value" id="kpiWeekSessions">0</div>
+            <div class="sub" id="kpiWeekSessionsSub">—</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Volume na semana</div>
+            <div class="value" id="kpiWeekVolume">0</div>
+            <div class="sub" id="kpiWeekVolumeSub">kg·reps</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Última sessão</div>
+            <div class="value" id="kpiLastVolume">0</div>
+            <div class="sub" id="kpiLastVolumeSub">kg·reps</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="align-items:flex-end; justify-content:space-between;">
+          <div>
+            <h2 style="margin-bottom:6px;">Volume (últimas sessões)</h2>
+            <small class="muted">Gráfico offline em Canvas (sem libs).</small>
+          </div>
+        </div>
+        <div class="chart-wrap" style="margin-top:12px;">
+          <canvas id="volumeChart" width="400" height="200" aria-label="Gráfico de volume"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGBOOK -->
+    <section id="screen-logbook" class="screen" aria-label="Logbook">
+      <div class="card">
+        <div class="logbook-head">
+          <div class="logbook-title">
+            <h2>Treino de hoje</h2>
+            <small id="todayLabel">—</small>
+          </div>
+          <div>
+            <button class="btn btn-ghost" id="btnAddExercise" type="button">+ Exercício</button>
+          </div>
+        </div>
+
+        <div class="inject-area" id="todayExercises">
+          <div class="empty-state">
+            Cole sua rotina na aba Rotina (na Parte 2/JS) e volte aqui para ver os exercícios do dia.
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <textarea id="sessionNotes" class="field" rows="3" placeholder="Observações do treino (opcional)"></textarea>
+          <button class="btn btn-primary" id="btnSaveSession" type="button">Salvar sessão</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- NAV -->
+  <nav class="nav" aria-label="Navegação">
+    <div class="nav-inner">
+      <button class="tab active" id="tab-dashboard" type="button" data-target="dashboard">Dashboard</button>
+      <button class="tab" id="tab-logbook" type="button" data-target="logbook">Logbook</button>
+      <button class="tab" id="tab-rotina" type="button" data-target="rotina">Rotina</button>
+      <button class="tab" id="tab-dieta" type="button" data-target="dieta">Dieta</button>
+      <button class="tab" id="tab-mais" type="button" data-target="mais">Mais</button>
+    </div>
+  </nav>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- PARE AQUI — NÃO ABRIR <script> NESTA PARTE 1 -->
+<script>
+/* =========================
+   LOGBOOK V2 — PARTE 2 (CORE + ROTINA + LOGBOOK)
+   (não fechar </script> aqui)
+========================= */
+
+const STORAGE_KEY = "LOGBOOK_V2";
+const OLD_KEY = "LOGBOOK_V2_PLACEHOLDER";
+
+/* ---------- Estado ---------- */
+let state = {
+  version: 2,
+  // Rotina
+  routineText: "",
+  routineParsed: {}, // { "Segunda": [{name, blocks:[{nSets,repMin,repMax}]}], ... }
+
+  // Sessões
+  sessions: [], // [{date, weekdayKey, exercises:[{name, sets:[{kg,reps,rir}]}], notes}]
+
+  // Reservas para partes seguintes (não usado ainda, mas preserva migração/backup)
+  days: {},      // Dieta/água/metas por data
+  foods: [],
+  tdee: {},
+  measures: [],
+  photos: [],
+  gems: []
+};
+
+function deepClone(obj){
+  return JSON.parse(JSON.stringify(obj || {}));
+}
+
+/* ---------- Migração ---------- */
+function migrateState(old){
+  // Migrar sem perder dados (routine, sessions, dietTargets/days, measures, photos, gems)
+  const base = deepClone(state);
+
+  if(!old || typeof old !== "object") return base;
+
+  // Alguns nomes comuns em versões antigas
+  const migrated = deepClone(base);
+
+  // rotina
+  migrated.routineText = old.routineText || old.routine || old.routineRaw || migrated.routineText;
+  migrated.routineParsed = old.routineParsed || old.routineJSON || migrated.routineParsed;
+
+  // sessões
+  migrated.sessions = Array.isArray(old.sessions) ? old.sessions : (Array.isArray(old.logbook) ? old.logbook : migrated.sessions);
+
+  // dieta/metas
+  // pode vir como dietTargets, dieta, days, nutrition, etc.
+  migrated.days = old.days || old.dietDays || old.nutritionDays || migrated.days;
+
+  // outras chaves exigidas
+  migrated.measures = Array.isArray(old.measures) ? old.measures : migrated.measures;
+  migrated.photos = Array.isArray(old.photos) ? old.photos : migrated.photos;
+  migrated.gems = Array.isArray(old.gems) ? old.gems : migrated.gems;
+
+  // preserva qualquer extra que já exista dentro do formato novo
+  migrated.foods = Array.isArray(old.foods) ? old.foods : migrated.foods;
+  migrated.tdee = old.tdee || migrated.tdee;
+
+  migrated.version = 2;
+
+  // Sanitização mínima
+  if(typeof migrated.routineText !== "string") migrated.routineText = "";
+  if(!migrated.routineParsed || typeof migrated.routineParsed !== "object") migrated.routineParsed = {};
+  if(!Array.isArray(migrated.sessions)) migrated.sessions = [];
+
+  return migrated;
+}
+
+/* ---------- Persistência ---------- */
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){
+    showToast("Erro ao salvar (storage cheio?)");
+  }
+}
+
+function loadState(){
+  try{
+    const curRaw = localStorage.getItem(STORAGE_KEY);
+    if(curRaw){
+      const cur = JSON.parse(curRaw);
+      state = migrateState(cur);
+      saveState();
+      return;
+    }
+
+    // Sem V2, tenta migrar da chave antiga
+    const oldRaw = localStorage.getItem(OLD_KEY);
+    if(oldRaw){
+      const old = JSON.parse(oldRaw);
+      state = migrateState(old);
+      saveState();
+      // opcional: limpar old
+      // localStorage.removeItem(OLD_KEY);
+      showToast("Dados migrados para LOGBOOK_V2");
+      return;
+    }
+
+    // Nada salvo: garante formato
+    state = migrateState(null);
+    saveState();
+  }catch(e){
+    state = migrateState(null);
+    saveState();
+    showToast("Estado resetado por erro de leitura");
+  }
+}
+
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function showToast(msg){
+  const el = document.getElementById("toast");
+  if(!el) return;
+  el.textContent = msg;
+  el.style.display = "block";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.style.display="none"; }, 2200);
+}
+
+/* ---------- Datas / Semana ---------- */
+function isoDay(d=new Date()){
+  return new Date(d).toISOString().slice(0,10);
+}
+
+// Mapeamento fixo pt-BR -> chave capitalizada
+const WEEK_KEYS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+function todayWeekKey(){
+  const d = new Date();
+  return WEEK_KEYS[d.getDay()];
+}
+
+// Semana ISO-like (suficiente p/ KPIs semanais)
+function weekId(date){
+  const d = new Date(date);
+  const temp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = temp.getUTCDay() || 7;
+  temp.setUTCDate(temp.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(temp.getUTCFullYear(),0,1));
+  const weekNo = Math.ceil((((temp - yearStart) / 86400000) + 1)/7);
+  return `${temp.getUTCFullYear()}-W${weekNo}`;
+}
+
+/* ---------- Parser de Rotina (V2) ---------- */
+/*
+  Entrada esperada:
+    Segunda
+    Supino reto 2x5-9, 1x8-10
+    Agachamento 3x6-8
+
+  Saída:
+    { "Segunda":[ {name:"Supino reto", blocks:[{nSets:2,repMin:5,repMax:9},{nSets:1,repMin:8,repMax:10}]}, ...], ... }
+*/
+function parseRoutineV2(text){
+  const lines = (text || "").split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+
+  const dayAliases = [
+    {key:"Segunda", re:/^segunda\b/i},
+    {key:"Terça", re:/^(terça|terca)\b/i},
+    {key:"Quarta", re:/^quarta\b/i},
+    {key:"Quinta", re:/^quinta\b/i},
+    {key:"Sexta", re:/^sexta\b/i},
+    {key:"Sábado", re:/^(sábado|sabado)\b/i},
+    {key:"Domingo", re:/^domingo\b/i},
+  ];
+
+  const out = {};
+  let currentDay = null;
+
+  for(const raw of lines){
+    // Detecta dia
+    const day = dayAliases.find(d=>d.re.test(raw));
+    if(day){
+      currentDay = day.key;
+      if(!out[currentDay]) out[currentDay] = [];
+      continue;
+    }
+    if(!currentDay) continue;
+
+    // Linha de exercício + blocos
+    // Aceita: "Supino 3x10-12" / "Supino 2x5-9,1x8-10" / com espaços variados
+    const parts = raw.split(",").map(p=>p.trim()).filter(Boolean);
+
+    // O nome do exercício é a parte antes do primeiro bloco "NxA-B"
+    // Estratégia: encontra primeiro match de bloco na linha e divide ali
+    const blockRe = /(\d+)\s*x\s*(\d+)\s*-\s*(\d+)/ig;
+    const firstBlock = blockRe.exec(raw);
+    if(!firstBlock){
+      // Se não tem blocos, ignora (sem placeholder)
+      continue;
+    }
+
+    const idx = firstBlock.index;
+    const name = raw.slice(0, idx).trim().replace(/\s+/g," ");
+    if(!name) continue;
+
+    // Agora extrai todos os blocos da linha inteira (não só do split por vírgula)
+    const blocks = [];
+    blockRe.lastIndex = 0;
+    let m;
+    while((m = blockRe.exec(raw)) !== null){
+      const nSets = parseInt(m[1],10);
+      const repMin = parseInt(m[2],10);
+      const repMax = parseInt(m[3],10);
+      if(nSets>0 && repMin>0 && repMax>=repMin){
+        blocks.push({nSets, repMin, repMax});
+      }
+    }
+    if(!blocks.length) continue;
+
+    out[currentDay].push({name, blocks});
+  }
+
+  return out;
+}
+
+/* ---------- Logbook UI ---------- */
+function renderLogbook(){
+  const wk = todayWeekKey();
+  const label = document.getElementById("todayLabel");
+  if(label) label.textContent = `${wk} • ${isoDay(new Date())}`;
+
+  const host = document.getElementById("todayExercises");
+  if(!host) return;
+
+  host.innerHTML = "";
+
+  const exercises = (state.routineParsed && state.routineParsed[wk]) ? state.routineParsed[wk] : [];
+
+  if(!exercises.length){
+    host.innerHTML = `
+      <div class="empty-state">
+        Nenhuma rotina para <b>${wk}</b>. Vá na aba <b>Rotina</b> (Parte 3/integração) e salve sua rotina.
+      </div>
+    `;
+    return;
+  }
+
+  exercises.forEach((ex, exIdx)=>{
+    host.appendChild(buildExerciseCard(ex.name, ex.blocks, exIdx));
+  });
+}
+
+function buildExerciseCard(name, blocks, exIdx){
+  const wrap = document.createElement("div");
+  wrap.className = "card";
+  wrap.style.marginTop = "12px";
+
+  const header = document.createElement("div");
+  header.style.display = "flex";
+  header.style.justifyContent = "space-between";
+  header.style.gap = "10px";
+  header.style.alignItems = "flex-start";
+
+  const title = document.createElement("div");
+  title.innerHTML = `<div style="font-weight:950;letter-spacing:.2px;">${escapeHtml(name)}</div>
+                     <small class="muted">Sets sugeridos pela rotina — você pode editar livremente.</small>`;
+
+  const actions = document.createElement("div");
+  actions.style.display = "flex";
+  actions.style.gap = "8px";
+
+  const btnAddSet = document.createElement("button");
+  btnAddSet.type = "button";
+  btnAddSet.className = "btn btn-ghost";
+  btnAddSet.textContent = "+ Set";
+  btnAddSet.addEventListener("click", ()=>{
+    const setsHost = wrap.querySelector(".sets-host");
+    setsHost.appendChild(buildSetRow());
+    // atualiza dashboards ao vivo (opcional)
+  });
+
+  const btnRemoveEx = document.createElement("button");
+  btnRemoveEx.type = "button";
+  btnRemoveEx.className = "btn btn-ghost";
+  btnRemoveEx.textContent = "Remover";
+  btnRemoveEx.addEventListener("click", ()=>{
+    wrap.remove();
+    showToast("Exercício removido (não salva até salvar sessão).");
+  });
+
+  actions.appendChild(btnAddSet);
+  actions.appendChild(btnRemoveEx);
+
+  header.appendChild(title);
+  header.appendChild(actions);
+
+  wrap.appendChild(header);
+
+  const setsHost = document.createElement("div");
+  setsHost.className = "sets-host";
+  setsHost.style.marginTop = "12px";
+
+  // Gera sets pelo nSets total dos blocos
+  const totalSets = (blocks||[]).reduce((acc,b)=>acc + (b.nSets||0), 0);
+  const n = totalSets>0 ? totalSets : 3;
+  for(let i=0;i<n;i++){
+    setsHost.appendChild(buildSetRow());
+  }
+
+  wrap.appendChild(setsHost);
+
+  return wrap;
+}
+
+function buildSetRow(){
+  const row = document.createElement("div");
+  row.className = "set-row";
+  row.style.marginTop = "8px";
+
+  const kg = document.createElement("input");
+  kg.className = "field";
+  kg.type = "number";
+  kg.step = "0.5";
+  kg.placeholder = "kg";
+  kg.style.marginBottom = "0";
+
+  const reps = document.createElement("input");
+  reps.className = "field";
+  reps.type = "number";
+  reps.step = "1";
+  reps.placeholder = "reps";
+  reps.style.marginBottom = "0";
+
+  const rir = document.createElement("input");
+  rir.className = "field";
+  rir.type = "number";
+  rir.step = "1";
+  rir.placeholder = "RIR";
+  rir.style.marginBottom = "0";
+
+  const del = document.createElement("button");
+  del.type = "button";
+  del.className = "btn btn-ghost";
+  del.textContent = "X";
+  del.style.padding = "10px 12px";
+  del.addEventListener("click", ()=>{
+    row.remove();
+  });
+
+  // layout flex
+  row.style.display = "grid";
+  row.style.gridTemplateColumns = "1fr 1fr 1fr auto";
+  row.style.gap = "8px";
+  row.style.alignItems = "center";
+
+  row.appendChild(kg);
+  row.appendChild(reps);
+  row.appendChild(rir);
+  row.appendChild(del);
+
+  return row;
+}
+
+function escapeHtml(str){
+  return (str||"").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+/* ---------- Salvar Sessão ---------- */
+function saveSession(){
+  const wk = todayWeekKey();
+  const date = new Date().toISOString();
+  const notesEl = document.getElementById("sessionNotes");
+  const notes = notesEl ? (notesEl.value||"").trim() : "";
+
+  const exCards = Array.from(document.querySelectorAll("#todayExercises .card"));
+  if(!exCards.length){
+    showToast("Nenhum exercício para salvar.");
+    return;
+  }
+
+  const exercises = [];
+  exCards.forEach(card=>{
+    const titleEl = card.querySelector("div[style*='font-weight:950']");
+    const name = titleEl ? titleEl.textContent.trim() : "Exercício";
+    const setRows = Array.from(card.querySelectorAll(".set-row"));
+    const sets = [];
+
+    setRows.forEach(r=>{
+      const inputs = r.querySelectorAll("input");
+      const kg = parseFloat(inputs[0].value);
+      const reps = parseInt(inputs[1].value,10);
+      const rir = parseInt(inputs[2].value,10);
+
+      sets.push({
+        kg: isFinite(kg) ? kg : 0,
+        reps: isFinite(reps) ? reps : 0,
+        rir: isFinite(rir) ? rir : null
+      });
+    });
+
+    exercises.push({name, sets});
+  });
+
+  const session = {date, weekdayKey:wk, exercises, notes};
+
+  state.sessions.push(session);
+  saveState();
+
+  // limpar notas
+  if(notesEl) notesEl.value = "";
+
+  showToast("Sessão salva.");
+}
+
+/* ---------- Dashboard (KPIs + Volume) ---------- */
+function sessionVolume(session){
+  let v = 0;
+  if(!session || !session.exercises) return 0;
+  session.exercises.forEach(ex=>{
+    (ex.sets||[]).forEach(s=>{
+      const kg = +s.kg, reps = +s.reps;
+      if(kg>0 && reps>0) v += kg*reps;
+    });
+  });
+  return Math.round(v);
+}
+
+function updateDashboard(){
+  const totalSessions = state.sessions.length;
+
+  const nowWeek = weekId(new Date());
+  let weekSessions = 0;
+  let weekVolume = 0;
+
+  for(const s of state.sessions){
+    const w = weekId(new Date(s.date));
+    if(w === nowWeek){
+      weekSessions++;
+      weekVolume += sessionVolume(s);
+    }
+  }
+
+  const last = totalSessions ? sessionVolume(state.sessions[totalSessions-1]) : 0;
+
+  // Atualiza KPIs
+  const elTotal = document.getElementById("kpiTotalSessions");
+  const elWeekS = document.getElementById("kpiWeekSessions");
+  const elWeekV = document.getElementById("kpiWeekVolume");
+  const elLastV = document.getElementById("kpiLastVolume");
+
+  if(elTotal) elTotal.textContent = String(totalSessions);
+  if(elWeekS) elWeekS.textContent = String(weekSessions);
+  if(elWeekV) elWeekV.textContent = String(Math.round(weekVolume));
+  if(elLastV) elLastV.textContent = String(last);
+}
+/* =========================
+   PARTE 3 — FINAL DEFINITIVA
+   (Navegação real + Rotina + Dieta + Gráfico + Init)
+========================= */
+
+/* ---------- Helpers de DOM ---------- */
+function $(id){ return document.getElementById(id); }
+
+function ensureScreens(){
+  const main = $("app");
+  if(!main) return;
+
+  // Rotina
+  if(!$("screen-rotina")){
+    const sec = document.createElement("section");
+    sec.id = "screen-rotina";
+    sec.className = "screen";
+    sec.setAttribute("aria-label","Rotina");
+    sec.innerHTML = `
+      <div class="card" id="routineCard"></div>
+    `;
+    main.appendChild(sec);
+  }
+
+  // Dieta
+  if(!$("screen-dieta")){
+    const sec = document.createElement("section");
+    sec.id = "screen-dieta";
+    sec.className = "screen";
+    sec.setAttribute("aria-label","Dieta");
+    sec.innerHTML = `
+      <div class="card" id="dietCard"></div>
+    `;
+    main.appendChild(sec);
+  }
+
+  // Mais (placeholder real, sem "em breve": mostra dados brutos úteis)
+  if(!$("screen-mais")){
+    const sec = document.createElement("section");
+    sec.id = "screen-mais";
+    sec.className = "screen";
+    sec.setAttribute("aria-label","Mais");
+    sec.innerHTML = `
+      <div class="card">
+        <h2>Mais</h2>
+        <small class="muted">Aqui você pode inspecionar/limpar dados localmente.</small>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+          <button class="btn btn-ghost" id="btnExportJSON" type="button">Exportar JSON</button>
+          <button class="btn btn-ghost" id="btnClearData" type="button">Limpar dados</button>
+        </div>
+        <textarea id="rawState" class="field" rows="10" style="margin-top:12px;" placeholder="Estado JSON..."></textarea>
+      </div>
+    `;
+    main.appendChild(sec);
+  }
+}
+
+/* ---------- Navegação ---------- */
+function nav(targetId){
+  // screens
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const screen = $("screen-" + targetId);
+  if(screen) screen.classList.add("active");
+
+  // tabs
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  const tab = $("tab-" + targetId);
+  if(tab) tab.classList.add("active");
+
+  // hooks
+  if(targetId === "logbook"){
+    renderLogbook();
+  }else if(targetId === "dashboard"){
+    updateDashboard();
+    drawChart(state.sessions);
+  }else if(targetId === "rotina"){
+    renderRoutineEditor();
+  }else if(targetId === "dieta"){
+    renderDiet();
+  }else if(targetId === "mais"){
+    renderMore();
+  }
+}
+
+/* ---------- Gráfico ---------- */
+function drawChart(sessions){
+  const canvas = $("volumeChart");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  // HiDPI
+  const cssW = canvas.clientWidth || 400;
+  const cssH = canvas.clientHeight || 200;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+
+  const last = (sessions||[]).slice(-7);
+  const vols = last.map(s=>sessionVolume(s));
+  const max = Math.max(...vols, 1);
+
+  const padL=10, padR=10, padT=12, padB=26;
+  const innerW = cssW - padL - padR;
+  const innerH = cssH - padT - padB;
+
+  // baseline grid
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = "#ffffff";
+  for(let i=0;i<=3;i++){
+    const y = padT + (innerH/3)*i;
+    ctx.fillRect(padL, y, innerW, 1);
+  }
+  ctx.globalAlpha = 1;
+
+  const n = Math.max(vols.length, 1);
+  const gap = 10;
+  const barW = Math.max(14, Math.floor((innerW - gap*(n-1)) / n));
+
+  vols.forEach((v,i)=>{
+    const x = padL + i*(barW+gap);
+    const h = Math.round((v/max)*innerH);
+    const y = padT + (innerH - h);
+
+    ctx.fillStyle = "#ff1a1a";
+    ctx.fillRect(x, y, barW, h);
+
+    // value
+    ctx.fillStyle = "rgba(255,255,255,.60)";
+    ctx.font = "11px -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif";
+    ctx.fillText(String(v), x, cssH-10);
+  });
+}
+
+/* ---------- Rotina (Editor real) ---------- */
+function renderRoutineEditor(){
+  const host = $("routineCard");
+  if(!host) return;
+
+  const current = (typeof state.routineText === "string") ? state.routineText : "";
+  const hasParsed = state.routineParsed && Object.keys(state.routineParsed).length;
+
+  host.innerHTML = `
+    <h2>Rotina</h2>
+    <small class="muted">Cole sua rotina por dias (Segunda..Domingo). Formato: "Supino reto 2x5-9, 1x8-10".</small>
+    <textarea id="routineTextarea" class="field" rows="12" style="margin-top:12px;" placeholder="Segunda
+Supino reto 2x5-9, 1x8-10
+Agachamento 3x6-8
+
+Terça
+Remada 3x8-12">${escapeHtml(current)}</textarea>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn btn-primary" id="btnSaveRoutine" type="button">Salvar Rotina</button>
+      <button class="btn btn-ghost" id="btnClearRoutine" type="button">Limpar Rotina</button>
+    </div>
+
+    <div style="margin-top:12px;">
+      <small class="muted">Status: ${hasParsed ? "rotina parseada e pronta ✅" : "ainda não salva"}</small>
+      <pre id="routinePreview" style="margin-top:10px;white-space:pre-wrap;background:rgba(10,10,18,.55);border:1px solid rgba(255,255,255,.06);padding:12px;border-radius:14px;max-height:260px;overflow:auto;"></pre>
+    </div>
+  `;
+
+  const preview = $("routinePreview");
+  if(preview){
+    preview.textContent = JSON.stringify(state.routineParsed || {}, null, 2);
+  }
+
+  const btnSave = $("btnSaveRoutine");
+  if(btnSave){
+    btnSave.onclick = ()=>{
+      const ta = $("routineTextarea");
+      const text = ta ? (ta.value || "") : "";
+      const parsed = parseRoutineV2(text);
+
+      if(!Object.keys(parsed).length){
+        showToast("Não consegui parsear. Verifique o formato (ex: Supino 3x8-10).");
+        return;
+      }
+
+      state.routineText = text;
+      state.routineParsed = parsed;
+      saveState();
+      showToast("Rotina salva ✅");
+      renderRoutineEditor();
+    };
+  }
+
+  const btnClear = $("btnClearRoutine");
+  if(btnClear){
+    btnClear.onclick = ()=>{
+      state.routineText = "";
+      state.routineParsed = {};
+      saveState();
+      showToast("Rotina limpa.");
+      renderRoutineEditor();
+    };
+  }
+}
+
+/* ---------- Dieta (simples, real e editável) ---------- */
+function ensureDietDay(dateStr){
+  if(!state.days || typeof state.days !== "object") state.days = {};
+  if(!state.days[dateStr]){
+    state.days[dateStr] = {
+      targets: {kcal:0, p:0, c:0, f:0},
+      meals: {cafe:[], almoco:[], lanche:[], jantar:[], ceia:[]}
+    };
+  }else{
+    const d = state.days[dateStr];
+    if(!d.targets) d.targets = {kcal:0,p:0,c:0,f:0};
+    if(!d.meals) d.meals = {cafe:[], almoco:[], lanche:[], jantar:[], ceia:[]};
+  }
+  return state.days[dateStr];
+}
+
+function mealLabel(k){
+  return ({cafe:"Café", almoco:"Almoço", lanche:"Lanche", jantar:"Jantar", ceia:"Ceia"}[k] || k);
+}
+
+function calcDietTotals(dayObj){
+  const t={kcal:0,p:0,c:0,f:0};
+  for(const mk of ["cafe","almoco","lanche","jantar","ceia"]){
+    for(const it of (dayObj.meals[mk]||[])){
+      t.kcal += +it.kcal||0;
+      t.p += +it.p||0;
+      t.c += +it.c||0;
+      t.f += +it.f||0;
+    }
+  }
+  t.kcal = Math.round(t.kcal);
+  t.p = +t.p.toFixed(1);
+  t.c = +t.c.toFixed(1);
+  t.f = +t.f.toFixed(1);
+  return t;
+}
+
+function renderDiet(){
+  const host = $("dietCard");
+  if(!host) return;
+
+  const dateStr = isoDay(new Date());
+  const d = ensureDietDay(dateStr);
+  const totals = calcDietTotals(d);
+
+  host.innerHTML = `
+    <h2>Dieta</h2>
+    <small class="muted">Versão simples (real): metas por dia + refeições + totais. (Banco/Parser avançado entra na próxima etapa.)</small>
+
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:180px;">
+        <small class="muted">Data</small>
+        <input id="dietDate" class="field" type="date" value="${dateStr}">
+      </div>
+      <div style="flex:1;min-width:180px;">
+        <small class="muted">Refeição</small>
+        <select id="dietMeal" class="field">
+          <option value="cafe">Café</option>
+          <option value="almoco">Almoço</option>
+          <option value="lanche">Lanche</option>
+          <option value="jantar">Jantar</option>
+          <option value="ceia">Ceia</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h3>Metas do dia</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input id="tKcal" class="field" type="number" placeholder="kcal" value="${d.targets.kcal||0}" style="flex:1;min-width:130px;">
+        <input id="tP" class="field" type="number" placeholder="P (g)" value="${d.targets.p||0}" style="flex:1;min-width:130px;">
+        <input id="tC" class="field" type="number" placeholder="C (g)" value="${d.targets.c||0}" style="flex:1;min-width:130px;">
+        <input id="tF" class="field" type="number" placeholder="F (g)" value="${d.targets.f||0}" style="flex:1;min-width:130px;">
+      </div>
+      <button class="btn btn-primary" id="btnSaveTargets" type="button" style="margin-top:10px;">Salvar metas</button>
+      <div style="margin-top:10px;">
+        <small class="muted"><b>Totais:</b> kcal ${totals.kcal} • P ${totals.p} • C ${totals.c} • F ${totals.f}</small>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Adicionar item (manual)</h3>
+      <input id="foodName" class="field" placeholder="Nome (ex: arroz, frango...)">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input id="fKcal" class="field" type="number" placeholder="kcal" style="flex:1;min-width:120px;">
+        <input id="fP" class="field" type="number" placeholder="P" style="flex:1;min-width:120px;">
+        <input id="fC" class="field" type="number" placeholder="C" style="flex:1;min-width:120px;">
+        <input id="fF" class="field" type="number" placeholder="F" style="flex:1;min-width:120px;">
+      </div>
+      <button class="btn btn-primary" id="btnAddFood" type="button" style="margin-top:10px;">Adicionar</button>
+    </div>
+
+    <div class="card">
+      <h3>Refeições do dia</h3>
+      <div id="dietMealsList"></div>
+    </div>
+  `;
+
+  // Bind date change (re-render)
+  $("dietDate").onchange = ()=>{
+    const newDate = $("dietDate").value || dateStr;
+    ensureDietDay(newDate);
+    // re-render para a nova data
+    renderDietForDate(newDate);
+  };
+
+  // Bind targets save
+  $("btnSaveTargets").onclick = ()=>{
+    const day = $("dietDate").value || dateStr;
+    const dayObj = ensureDietDay(day);
+    dayObj.targets.kcal = Math.max(0, Math.round(parseFloat($("tKcal").value)||0));
+    dayObj.targets.p = Math.max(0, Math.round(parseFloat($("tP").value)||0));
+    dayObj.targets.c = Math.max(0, Math.round(parseFloat($("tC").value)||0));
+    dayObj.targets.f = Math.max(0, Math.round(parseFloat($("tF").value)||0));
+    saveState();
+    showToast("Metas salvas.");
+    renderDietForDate(day);
+    updateDashboard();
+  };
+
+  // Bind add food
+  $("btnAddFood").onclick = ()=>{
+    const day = $("dietDate").value || dateStr;
+    const meal = $("dietMeal").value || "cafe";
+    const dayObj = ensureDietDay(day);
+
+    const name = ($("foodName").value||"").trim();
+    const kcal = Math.round(parseFloat($("fKcal").value)||0);
+    const p = parseFloat($("fP").value)||0;
+    const c = parseFloat($("fC").value)||0;
+    const f = parseFloat($("fF").value)||0;
+
+    if(!name) return showToast("Informe o nome.");
+    if(!(kcal>0 || p>0 || c>0 || f>0)) return showToast("Informe kcal ou macros.");
+
+    const autoKcal = kcal>0 ? kcal : Math.round(p*4 + c*4 + f*9);
+
+    dayObj.meals[meal].push({
+      id: "D" + Date.now() + Math.random().toString(16).slice(2),
+      name,
+      kcal: autoKcal,
+      p:+p.toFixed(1),
+      c:+c.toFixed(1),
+      f:+f.toFixed(1)
+    });
+
+    $("foodName").value=""; $("fKcal").value=""; $("fP").value=""; $("fC").value=""; $("fF").value="";
+    saveState();
+    showToast("Item adicionado.");
+    renderDietForDate(day);
+    updateDashboard();
+  };
+
+  // initial render list
+  renderDietMealsList(dateStr);
+}
+
+function renderDietForDate(dateStr){
+  // Re-render mantendo a tela Dieta ativa
+  const host = $("dietCard");
+  if(!host) return;
+  const d = ensureDietDay(dateStr);
+  const totals = calcDietTotals(d);
+
+  // Atualiza apenas blocos dinâmicos quando possível
+  // Para simplicidade e robustez: redesenha tudo chamando renderDiet()
+  renderDiet();
+  // Após renderDiet(), força date para o dateStr selecionado e atualiza list
+  if($("dietDate")) $("dietDate").value = dateStr;
+  renderDietMealsList(dateStr);
+  // Atualiza totals textual (já vem do renderDiet atual, mas garante)
+  updateDashboard();
+}
+
+function renderDietMealsList(dateStr){
+  const dayObj = ensureDietDay(dateStr);
+  const host = $("dietMealsList");
+  if(!host) return;
+
+  const totals = calcDietTotals(dayObj);
+
+  let html = `<div style="margin-bottom:10px;"><small class="muted"><b>Totais:</b> kcal ${totals.kcal} • P ${totals.p} • C ${totals.c} • F ${totals.f}</small></div>`;
+
+  for(const mk of ["cafe","almoco","lanche","jantar","ceia"]){
+    const items = dayObj.meals[mk] || [];
+    html += `<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;margin-top:10px;">
+      <div style="font-weight:950;margin-bottom:6px;">${mealLabel(mk)}</div>
+      ${items.length ? items.map(it=>`
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-top:8px;">
+          <div>
+            <div><b>${escapeHtml(it.name)}</b></div>
+            <small class="muted">kcal ${Math.round(it.kcal)} • P ${it.p} • C ${it.c} • F ${it.f}</small>
+          </div>
+          <button class="btn btn-ghost" type="button" onclick="removeDietItem('${dateStr}','${mk}','${it.id}')">X</button>
+        </div>
+      `).join("") : `<small class="muted">Sem itens.</small>`}
+    </div>`;
+  }
+
+  host.innerHTML = html;
+}
+
+function removeDietItem(dateStr, mealKey, itemId){
+  const d = ensureDietDay(dateStr);
+  const arr = d.meals[mealKey] || [];
+  const idx = arr.findIndex(x=>x.id===itemId);
+  if(idx>=0){
+    arr.splice(idx,1);
+    saveState();
+    showToast("Removido.");
+    renderDietForDate(dateStr);
+  }
+}
+
+/* ---------- Mais (export/clear real) ---------- */
+function renderMore(){
+  const ta = $("rawState");
+  if(ta){
+    ta.value = JSON.stringify(state, null, 2);
+  }
+
+  const exp = $("btnExportJSON");
+  if(exp){
+    exp.onclick = ()=>{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "logbook_v2_backup.json";
+      a.click();
+      showToast("Exportado.");
+    };
+  }
+
+  const clear = $("btnClearData");
+  if(clear){
+    clear.onclick = ()=>{
+      localStorage.removeItem(STORAGE_KEY);
+      // opcional: também remove OLD_KEY
+      // localStorage.removeItem(OLD_KEY);
+      state = migrateState(null);
+      saveState();
+      showToast("Dados limpos.");
+      // atualiza tudo
+      updateDashboard();
+      drawChart(state.sessions);
+      renderMore();
+      nav("dashboard");
+    };
+  }
+}
+
+/* ---------- Patch Dashboard para incluir aderência simples (se dieta existir) ---------- */
+const _updateDashboard_original = updateDashboard;
+updateDashboard = function(){
+  _updateDashboard_original();
+
+  // Se existir dieta do dia (na estrutura state.days), calcula aderência kcal e proteína (se metas)
+  try{
+    const today = isoDay(new Date());
+    if(state.days && state.days[today]){
+      const dayObj = ensureDietDay(today);
+      const totals = calcDietTotals(dayObj);
+      const tgt = dayObj.targets || {kcal:0,p:0,c:0,f:0};
+
+      // coloca em sublinhas se existirem os elementos
+      const sub1 = $("kpiWeekSessionsSub");
+      const sub2 = $("kpiTotalSessionsSub");
+
+      let kcalPct = (tgt.kcal>0) ? Math.min(999, Math.round((totals.kcal/tgt.kcal)*100)) : null;
+      let pPct = (tgt.p>0) ? Math.min(999, Math.round((totals.p/tgt.p)*100)) : null;
+
+      if(sub1){
+        sub1.textContent = (kcalPct!==null && pPct!==null)
+          ? `Aderência hoje: kcal ${kcalPct}% • P ${pPct}%`
+          : "Aderência hoje: —";
+      }
+      if(sub2){
+        sub2.textContent = (totals.kcal>0) ? `Hoje: ${totals.kcal} kcal` : "—";
+      }
+    }
+  }catch(e){}
+};
+
+/* ---------- INIT FINAL ---------- */
+function init(){
+  ensureScreens();
+  loadState();
+
+  // Tabs
+  document.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const target = btn.getAttribute("data-target");
+      nav(target);
+    });
+  });
+
+  // Salvar sessão
+  const saveBtn = $("btnSaveSession");
+  if(saveBtn){
+    saveBtn.addEventListener("click", ()=>{
+      saveSession();
+      updateDashboard();
+      drawChart(state.sessions);
+      nav("dashboard");
+    });
+  }
+
+  // Adicionar exercício extra
+  const addExBtn = $("btnAddExercise");
+  if(addExBtn){
+    addExBtn.addEventListener("click", ()=>{
+      const host = $("todayExercises");
+      if(!host) return;
+      const exCard = buildExerciseCard("Exercício extra", [{nSets:3,repMin:0,repMax:0}], Date.now());
+      host.appendChild(exCard);
+      showToast("Exercício extra adicionado.");
+    });
+  }
+
+  // Primeira renderização
+  nav("dashboard");
+  drawChart(state.sessions);
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
+
+
